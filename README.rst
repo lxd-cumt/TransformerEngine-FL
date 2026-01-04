@@ -6,7 +6,9 @@
 |License|
 
 
-**TransformerEngine-FL is a fork of TransformerEngine that introduces a plugin-based architecture for supporting diverse AI chips, built on top of `FlagOS <https://github.com/flagos-ai>`_, a unified open-source AI system software stack.**
+**TransformerEngine-FL is a fork of TransformerEngine that introduces a plugin-based architecture for supporting diverse AI chips, built on top of** **FlagOS**__, **a unified open-source AI system software stack.**
+
+__ https://github.com/flagos-ai
 
 Transformer Engine
 ==================
