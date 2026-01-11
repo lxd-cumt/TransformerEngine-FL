@@ -71,7 +71,15 @@ class AttnFuncFL(torch.autograd.Function):
 
         is_causal = attn_mask_type == 'causal'
 
-        with flag_gems.use_gems():
+        try:
+            flag_gems_global_registrar = getattr(flag_gems, 'current_work_registrar', None)
+        except Exception as e:
+            raise RuntimeError(f"Failed to get flag gems registrar: {e}.")
+        is_flag_gems_global_enabled = flag_gems_global_registrar is not None
+        # Use nullcontext if flag_gems is already globally enabled, otherwise use use_gems() context
+        gems_context = nullcontext() if is_flag_gems_global_enabled else flag_gems.use_gems()
+
+        with gems_context:
             # FlagGems requires contiguous tensors, so we must call contiguous() after permute
             q_permuted = q.permute(1, 2, 0, 3).contiguous()
             k_permuted = k.permute(1, 2, 0, 3).contiguous()
@@ -160,7 +168,15 @@ class AttnFuncFL(torch.autograd.Function):
 
             dqkv_te_dtype = TE_DType[d_out.dtype]
 
-            with flag_gems.use_gems():
+            try:
+                flag_gems_global_registrar = getattr(flag_gems, 'current_work_registrar', None)
+            except Exception as e:
+                raise RuntimeError(f"Failed to get flag gems registrar: {e}.")
+            is_flag_gems_global_enabled = flag_gems_global_registrar is not None
+            # Use nullcontext if flag_gems is already globally enabled, otherwise use use_gems() context
+            gems_context = nullcontext() if is_flag_gems_global_enabled else flag_gems.use_gems()
+
+            with gems_context:
                 # Ensure all tensors are contiguous for FlagGems backward
                 q_permuted = q_permuted.contiguous() if not q_permuted.is_contiguous() else q_permuted
                 k_permuted = k_permuted.contiguous() if not k_permuted.is_contiguous() else k_permuted
