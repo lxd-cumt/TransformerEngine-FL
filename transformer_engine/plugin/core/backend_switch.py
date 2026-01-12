@@ -1,10 +1,8 @@
-_flag_gems_context = None
-_flag_gems_context_entered = False
 import flag_gems
-
 from .types import BackendImplKind
 
-
+_flag_gems_context = None
+_flag_gems_context_entered = False
 
 def backend_context_switch(cur_backend):
     """
@@ -34,7 +32,6 @@ def backend_context_switch(cur_backend):
         _flag_gems_context_entered = True
         return
 
-    
     if cur_backend == BackendImplKind.REFERENCE and _flag_gems_context_entered:
         _flag_gems_context.__exit__(None, None, None)
         _flag_gems_context_entered = False
