@@ -7,10 +7,6 @@ _flag_gems_context_entered = False
 def backend_context_switch(cur_backend):
     """
     Switch backend context based on the current backend.
-    
-    Args:
-        pre_backend: Previous backend (optional, will use cached value if None)
-        cur_backend: Current backend (optional, will use cached value if None)
     """
     global _flag_gems_context, _flag_gems_context_entered
     assert cur_backend is not None, "Current Backend name cannot be None"
