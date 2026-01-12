@@ -5,8 +5,7 @@
 from typing import Optional, List
 import torch
 import flag_gems
-from contextlib import nullcontext
-
+from transformer_engine.plugin.core.backends.flagos.utils import gems_context
 
 def multi_tensor_adam_fl(
     chunk_size: int,
@@ -23,15 +22,8 @@ def multi_tensor_adam_fl(
     inv_scale: Optional[float] = 1.0,
     out_dtype: Optional[torch.dtype] = None,
 ) -> None:
-    try:
-        flag_gems_global_registrar = getattr(flag_gems, 'current_work_registrar', None)
-    except Exception as e:
-        raise RuntimeError(f"Failed to get flag gems registrar: {e}.")
-    is_flag_gems_global_enabled = flag_gems_global_registrar is not None
-    # Use nullcontext if flag_gems is already globally enabled, otherwise use use_gems() context
-    gems_context = nullcontext() if is_flag_gems_global_enabled else flag_gems.use_gems()
 
-    with gems_context:
+    with gems_context():
         num_lists = len(tensor_lists)
         assert num_lists in [4, 5], f"Expected 4 or 5 tensor lists, got {num_lists}"
 

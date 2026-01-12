@@ -6,8 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import torch
 
 import flag_gems
-from contextlib import nullcontext
-
+from transformer_engine.plugin.core.backends.flagos.utils import gems_context
 
 __all__ = [
     "generic_gemm_fl",
@@ -65,15 +64,8 @@ def generic_gemm_fl(
     alpha: float = 1.0,
     beta: Optional[float] = None,
 ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[torch.Tensor], Optional[torch.Tensor]]:
-    try:
-        flag_gems_global_registrar = getattr(flag_gems, 'current_work_registrar', None)
-    except Exception as e:
-        raise RuntimeError(f"Failed to get flag gems registrar: {e}.")
-    is_flag_gems_global_enabled = flag_gems_global_registrar is not None
-    # Use nullcontext if flag_gems is already globally enabled, otherwise use use_gems() context
-    gems_context = nullcontext() if is_flag_gems_global_enabled else flag_gems.use_gems()
 
-    with gems_context:
+    with gems_context():
         assert not gelu and gelu_in is None, "Triton-Based General Gemm do not support gelu now"
         assert quantizer is None, "Triton-Based General Gemm do not support quantization now"
         assert bias is None, "Triton-Based General Gemm do not support bias now"

@@ -4,9 +4,8 @@
 
 import torch
 import flag_gems
-from contextlib import nullcontext
 
-
+from transformer_engine.plugin.core.backends.flagos.utils import gems_context
 
 def rmsnorm_fwd_fl(
     input,
@@ -18,15 +17,7 @@ def rmsnorm_fwd_fl(
     sm_margin,
     zero_centered_gamma,
 ):
-    try:
-        flag_gems_global_registrar = getattr(flag_gems, 'current_work_registrar', None)
-    except Exception as e:
-        raise RuntimeError(f"Failed to get flag gems registrar: {e}.")
-    is_flag_gems_global_enabled = flag_gems_global_registrar is not None
-    # Use nullcontext if flag_gems is already globally enabled, otherwise use use_gems() context
-    gems_context = nullcontext() if is_flag_gems_global_enabled else flag_gems.use_gems()
-
-    with gems_context:
+    with gems_context():
         if zero_centered_gamma:
             weight_adj = 1 + weight
         else:
@@ -54,15 +45,7 @@ def rmsnorm_bwd_fl(
     zero_centered_gamma,
     eps,
 ):
-    try:
-        flag_gems_global_registrar = getattr(flag_gems, 'current_work_registrar', None)
-    except Exception as e:
-        raise RuntimeError(f"Failed to get flag gems registrar: {e}.")
-    is_flag_gems_global_enabled = flag_gems_global_registrar is not None
-    # Use nullcontext if flag_gems is already globally enabled, otherwise use use_gems() context
-    gems_context = nullcontext() if is_flag_gems_global_enabled else flag_gems.use_gems()
-
-    with gems_context:
+    with gems_context():
         # When zero_centered_gamma is True, forward uses (1 + gamma) as weight
         # So backward needs to use (1 + gamma) for computing dx
         if zero_centered_gamma:
