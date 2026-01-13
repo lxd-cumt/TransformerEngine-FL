@@ -56,12 +56,6 @@ def multi_tensor_adam_fl(
         m = flag_gems.add_(flag_gems.mul_(m, beta1), g, alpha=1-beta1)
         v = flag_gems.add_(flag_gems.mul_(v, beta2), flag_gems.mul_(flag_gems.mul_(g, g), 1 - beta2))
 
-        m = flag_gems.mul(m, beta1)
-        m = flag_gems.add(m, g, alpha=1 - beta1)
-        v = flag_gems.mul(v, beta2)
-        tmp = flag_gems.mul_(flag_gems.mul(g, g), 1 - beta2)
-        v = flag_gems.add(v, tmp)
-
         m_corr = m.clone()
         v_corr = v.clone()
         if bias_correction == 1:
