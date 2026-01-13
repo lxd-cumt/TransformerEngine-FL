@@ -53,6 +53,9 @@ def multi_tensor_adam_fl(
         if inv_scale is not None and inv_scale != 1.0:
             g = flag_gems.mul(g, inv_scale)
 
+        m = flag_gems.add_(flag_gems.mul_(m, beta1), g, alpha=1-beta1)
+        v = flag_gems.add_(flag_gems.mul_(v, beta2), flag_gems.mul_(flag_gems.mul_(g, g), 1 - beta2))
+
         m = flag_gems.mul(m, beta1)
         m = flag_gems.add(m, g, alpha=1 - beta1)
         v = flag_gems.mul(v, beta2)
@@ -65,12 +68,12 @@ def multi_tensor_adam_fl(
             m_corr = flag_gems.true_divide(m_corr, bias_correction1)
             v_corr = flag_gems.true_divide(v_corr, bias_correction2)
 
-        update = flag_gems.true_divide(m_corr, flag_gems.add(v_corr.sqrt(), eps))
+        update = flag_gems.true_divide(m_corr, flag_gems.add(flag_gems.sqrt(v_corr), eps))
 
         if is_adamw:
             p = flag_gems.mul_(p, 1 - lr * weight_decay)
         else:
-            update = flag_gems.add_(p, alpha=weight_decay)
+            update = flag_gems.add_(update, p, alpha=weight_decay)
 
         p = flag_gems.add_(p, update, alpha=-lr)
 
