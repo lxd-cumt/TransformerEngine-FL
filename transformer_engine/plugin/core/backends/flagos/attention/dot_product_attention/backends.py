@@ -72,7 +72,7 @@ class AttnFuncFL(torch.autograd.Function):
 
         is_causal = attn_mask_type == 'causal'
 
-
+        # FlagGems requires contiguous tensors, so we must call contiguous() after permute
         q_permuted = q.permute(1, 2, 0, 3).contiguous()
         k_permuted = k.permute(1, 2, 0, 3).contiguous()
         v_permuted = v.permute(1, 2, 0, 3).contiguous()
@@ -87,9 +87,9 @@ class AttnFuncFL(torch.autograd.Function):
             scale=attn_scale,
             enable_gqa=True,
         )
-        # Must be contiguous for .view() in FlashAttentionFL.forward
-        out = out_permuted.permute(2, 0, 1, 3).contiguous()
 
+            # Must be contiguous for .view() in FlashAttentionFL.forward
+        out = out_permuted.permute(2, 0, 1, 3).contiguous()
         aux_ctx_tensors = [out_permuted, m]
         out_ret = out
         qkvo_tensors = (q_permuted, k_permuted, v_permuted, out_permuted)
@@ -160,7 +160,7 @@ class AttnFuncFL(torch.autograd.Function):
 
             dqkv_te_dtype = TE_DType[d_out.dtype]
 
-
+            # Ensure all tensors are contiguous for FlagGems backward
             q_permuted = q_permuted.contiguous() if not q_permuted.is_contiguous() else q_permuted
             k_permuted = k_permuted.contiguous() if not k_permuted.is_contiguous() else k_permuted
             v_permuted = v_permuted.contiguous() if not v_permuted.is_contiguous() else v_permuted
