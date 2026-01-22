@@ -28,7 +28,6 @@ class DType(IntEnum):
 class Float8BlockScaleTensorFormat(IntEnum):
     GEMM_READY = 0
     COMPACT = 1
-    INVALID = 2
 
 class NVTE_Activation_Type(IntEnum):
     GELU = 0
@@ -91,7 +90,6 @@ class NVTE_Fused_Attn_Backend(IntEnum):
     NVTE_F16_max512_seqlen = 0
     NVTE_F16_arbitrary_seqlen = 1
     NVTE_FP8 = 2
-    NVTE_FA3 = 3  # FL-specific extension (Flash Attention 3), not in native TE
 
 class NVTE_QKV_Format(IntEnum):
     NVTE_SBHD = 0
