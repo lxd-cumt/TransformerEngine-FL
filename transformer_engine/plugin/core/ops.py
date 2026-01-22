@@ -86,7 +86,7 @@ class NVTE_Mask_Type(IntEnum):
     NVTE_ARBITRARY_MASK = 6
 
 class NVTE_Fused_Attn_Backend(IntEnum):
-    NVTE_No_Backend = -1  # Native TE value
+    NVTE_No_Backend = -1
     NVTE_F16_max512_seqlen = 0
     NVTE_F16_arbitrary_seqlen = 1
     NVTE_FP8 = 2
