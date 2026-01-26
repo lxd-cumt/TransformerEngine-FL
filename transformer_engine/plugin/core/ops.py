@@ -83,7 +83,6 @@ class NVTE_Mask_Type(IntEnum):
     NVTE_PADDING_CAUSAL_MASK = 3
     NVTE_CAUSAL_BOTTOM_RIGHT_MASK = 4
     NVTE_PADDING_CAUSAL_BOTTOM_RIGHT_MASK = 5
-    NVTE_ARBITRARY_MASK = 6
 
 class NVTE_Fused_Attn_Backend(IntEnum):
     NVTE_No_Backend = -1
