@@ -36,6 +36,9 @@ def _ensure_kunlunxin_available():
             _kunlunxin_available = False
         except Exception as e:
             _kunlunxin_available = False
+        
+    return _kunlunxin_available
+
 
 
 def _check_kunlunxin_available() -> bool:
