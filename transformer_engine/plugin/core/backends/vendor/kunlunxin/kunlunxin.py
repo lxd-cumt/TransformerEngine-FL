@@ -10,30 +10,40 @@ import torch
 
 from transformer_engine.plugin.core.ops import TEFLBackendBase, FP8TensorMeta, NVTE_Fused_Attn_Backend
 
+_kunlunxin_available = False
+
+def _ensure_kunlunxin_available():
+    global _kunlunxin_available
+    if not _kunlunxin_available:
+        try:
+            result = subprocess.run(
+                ["xpu-smi"],
+                capture_output=True,
+                timeout=5,
+                text=True
+            )
+            
+            if result.returncode == 0:
+                _kunlunxin_available = True
+            else:
+                _kunlunxin_available = False
+                
+        except subprocess.TimeoutExpired:
+            _kunlunxin_available = False
+        except FileNotFoundError:
+            _kunlunxin_available = False
+        except OSError as e:
+            _kunlunxin_available = False
+        except Exception as e:
+            _kunlunxin_available = False
+
 
 def _check_kunlunxin_available() -> bool:
     """Check if xpu-smi command can be executed successfully."""
-    try:
-        result = subprocess.run(
-            ["xpu-smi"],
-            capture_output=True,
-            timeout=5,
-            text=True
-        )
-        
-        if result.returncode == 0:
-            return True
-        else:
-            return False
-            
-    except subprocess.TimeoutExpired:
+    if not _ensure_kunlunxin_available():
         return False
-    except FileNotFoundError:
-        return False
-    except OSError as e:
-        return False
-    except Exception as e:
-        return False
+    else:
+        return True
 
 
 class KunLunXinBackend(TEFLBackendBase):
