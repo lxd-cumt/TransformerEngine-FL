@@ -19,7 +19,7 @@ def _ensure_kunlunxin_available():
             result = subprocess.run(
                 ["xpu-smi"],
                 capture_output=True,
-                timeout=5,
+                timeout=10,
                 text=True
             )
             
