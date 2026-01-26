@@ -39,14 +39,10 @@ def _check_kunlunxin_available() -> bool:
 class KunLunXinBackend(TEFLBackendBase):
     @staticmethod
     def check_available() -> bool:
-        a = _check_kunlunxin_available()
-        print(f"kunlunxin backend {a}")
-        return a
+        return _check_kunlunxin_available()
 
     def is_available(self) -> bool:
-        a = _check_kunlunxin_available()
-        print(f"kunlunxin backend {a}")
-        return a
+        return _check_kunlunxin_available()
 
     def get_flash_attention_class(self):
         from .flash_attention import FlashAttentionTorch
