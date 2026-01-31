@@ -300,9 +300,34 @@ class HygonBackend(TEFLBackendBase):
             extra_output, bulk_overlap, alpha, beta
         )
 
-    def te_general_grouped_gemm(self, *args, **kwargs) -> Any:
+    @_convert_dtype_params
+    def te_general_grouped_gemm(
+        self,
+        A: list[object],
+        transA: bool,
+        B: list[object],
+        transB: bool,
+        out: Optional[list[torch.Tensor]],
+        output_dtype: torch.dtype,
+        m_splits: list[int],
+        bias: list[torch.Tensor],
+        bias_type: Any,
+        single_output: bool,
+        gelu_input: list[torch.Tensor],
+        grad: bool,
+        workspace: list[torch.Tensor],
+        workspace_size: int,
+        accumulate: bool,
+        use_split_accumulator: bool,
+        sm_count: int,
+    ) -> Any:
         tex = self._get_tex()
-        return tex.te_general_grouped_gemm(*args, **kwargs)
+        return tex.te_general_grouped_gemm(
+            A, transA, B, transB, out, output_dtype, m_splits,
+            bias, bias_type, single_output, gelu_input, grad,
+            workspace, workspace_size, accumulate, use_split_accumulator,
+            sm_count
+        )
 
     def gelu(self, input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
