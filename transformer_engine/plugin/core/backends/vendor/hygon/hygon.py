@@ -141,6 +141,45 @@ def _convert_dtype_params(func):
 
     return wrapper
 
+def _convert_qkv_format_params(func):
+    import functools
+    import inspect
+
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        tex = self._get_tex()
+        qkv_format_params = ['qkv_format']
+
+        def convert_enum(py_enum, native_enum_class):
+            if py_enum is None:
+                return None
+            if type(py_enum).__module__ == 'transformer_engine_torch_hygon':
+                return py_enum
+            if hasattr(py_enum, 'name'):
+                enum_name = py_enum.name
+                if hasattr(native_enum_class, enum_name):
+                    return getattr(native_enum_class, enum_name)
+            return py_enum
+
+        for param_name in qkv_format_params:
+            if param_name in kwargs:
+                value = kwargs[param_name]
+                converted = convert_enum(value, tex.NVTE_QKV_Format)
+                kwargs[param_name] = converted
+
+        sig = inspect.signature(func)
+        param_names = list(sig.parameters.keys())[1:]
+
+        args_list = list(args)
+        for i, (param_name, arg_value) in enumerate(zip(param_names, args_list)):
+            if param_name in qkv_format_params:
+                converted = convert_enum(arg_value, tex.NVTE_QKV_Format)
+                args_list[i] = converted
+
+        return func(self, *args_list, **kwargs)
+
+    return wrapper
+
 class HygonBackend(TEFLBackendBase):
     @staticmethod
     def check_available() -> bool:
@@ -618,21 +657,79 @@ class HygonBackend(TEFLBackendBase):
         tex = self._get_tex()
         return tex.convert_bshd_to_thd(*args, **kwargs)
 
-    def fused_rope_forward(self, *args, **kwargs) -> Any:
+    @_convert_qkv_format_params
+    def fused_rope_forward(
+        self,
+        input: torch.Tensor,
+        freqs: torch.Tensor,
+        start_positions: Optional[torch.Tensor] = None,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cu_seqlens: Optional[torch.Tensor] = None,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> torch.Tensor:
         tex = self._get_tex()
-        return tex.fused_rope_forward(*args, **kwargs)
+        return tex.fused_rope_forward(
+            input, freqs, start_positions, qkv_format,
+            interleaved, cu_seqlens, cp_size, cp_rank
+        )
 
-    def fused_rope_backward(self, *args, **kwargs) -> Any:
+    @_convert_qkv_format_params
+    def fused_rope_backward(
+        self,
+        output_grads: torch.Tensor,
+        freqs: torch.Tensor,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cu_seqlens: Optional[torch.Tensor] = None,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> torch.Tensor:
         tex = self._get_tex()
-        return tex.fused_rope_backward(*args, **kwargs)
+        return tex.fused_rope_backward(
+            output_grads, freqs, qkv_format,
+            interleaved, cu_seqlens, cp_size, cp_rank
+        )
 
-    def fused_qkv_rope_forward(self, *args, **kwargs) -> Any:
+    @_convert_qkv_format_params
+    def fused_qkv_rope_forward(
+        self,
+        qkv_input: torch.Tensor,
+        q_freqs: torch.Tensor,
+        k_freqs: torch.Tensor,
+        start_positions: Optional[torch.Tensor] = None,
+        qkv_split_arg_list: list[int] = None,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         tex = self._get_tex()
-        return tex.fused_qkv_rope_forward(*args, **kwargs)
+        return tex.fused_qkv_rope_forward(
+            qkv_input, q_freqs, k_freqs, start_positions,
+            qkv_split_arg_list, qkv_format, interleaved, cp_size, cp_rank
+        )
 
-    def fused_qkv_rope_backward(self, *args, **kwargs) -> Any:
+    @_convert_qkv_format_params
+    def fused_qkv_rope_backward(
+        self,
+        q_grad_out: torch.Tensor,
+        k_grad_out: torch.Tensor,
+        v_grad_out: torch.Tensor,
+        q_freqs: torch.Tensor,
+        k_freqs: torch.Tensor,
+        qkv_split_arg_list: list[int] = None,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> torch.Tensor:
         tex = self._get_tex()
-        return tex.fused_qkv_rope_backward(*args, **kwargs)
+        return tex.fused_qkv_rope_backward(
+            q_grad_out, k_grad_out, v_grad_out, q_freqs, k_freqs,
+            qkv_split_arg_list, qkv_format, interleaved, cp_size, cp_rank
+        )
 
     def fused_topk_with_score_function_fwd(
         self,

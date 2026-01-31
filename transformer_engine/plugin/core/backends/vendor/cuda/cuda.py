@@ -179,6 +179,45 @@ def _convert_dtype_params(func):
 
     return wrapper
 
+def _convert_qkv_format_params(func):
+    import functools
+    import inspect
+
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        tex = self._get_tex()
+        qkv_format_params = ['qkv_format']
+
+        def convert_enum(py_enum, native_enum_class):
+            if py_enum is None:
+                return None
+            if type(py_enum).__module__ == 'transformer_engine_torch_nv':
+                return py_enum
+            if hasattr(py_enum, 'name'):
+                enum_name = py_enum.name
+                if hasattr(native_enum_class, enum_name):
+                    return getattr(native_enum_class, enum_name)
+            return py_enum
+
+        for param_name in qkv_format_params:
+            if param_name in kwargs:
+                value = kwargs[param_name]
+                converted = convert_enum(value, tex.NVTE_QKV_Format)
+                kwargs[param_name] = converted
+
+        sig = inspect.signature(func)
+        param_names = list(sig.parameters.keys())[1:]
+
+        args_list = list(args)
+        for i, (param_name, arg_value) in enumerate(zip(param_names, args_list)):
+            if param_name in qkv_format_params:
+                converted = convert_enum(arg_value, tex.NVTE_QKV_Format)
+                args_list[i] = converted
+
+        return func(self, *args_list, **kwargs)
+
+    return wrapper
+
 class CUDABackend(TEFLBackendBase):
     @staticmethod
     def check_available() -> bool:
@@ -279,9 +318,34 @@ class CUDABackend(TEFLBackendBase):
             extra_output, bulk_overlap, alpha, beta
         )
 
-    def te_general_grouped_gemm(self, *args, **kwargs) -> Any:
+    @_convert_dtype_params
+    def te_general_grouped_gemm(
+        self,
+        A: list[object],
+        transA: bool,
+        B: list[object],
+        transB: bool,
+        out: Optional[list[torch.Tensor]],
+        output_dtype: torch.dtype,
+        m_splits: list[int],
+        bias: list[torch.Tensor],
+        bias_type: Any,
+        single_output: bool,
+        gelu_input: list[torch.Tensor],
+        grad: bool,
+        workspace: list[torch.Tensor],
+        workspace_size: int,
+        accumulate: bool,
+        use_split_accumulator: bool,
+        sm_count: int,
+    ) -> Any:
         tex = self._get_tex()
-        return tex.te_general_grouped_gemm(*args, **kwargs)
+        return tex.te_general_grouped_gemm(
+            A, transA, B, transB, out, output_dtype, m_splits,
+            bias, bias_type, single_output, gelu_input, grad,
+            workspace, workspace_size, accumulate, use_split_accumulator,
+            sm_count
+        )
 
     def gelu(self, input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
@@ -319,6 +383,7 @@ class CUDABackend(TEFLBackendBase):
     def swiglu(self, input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
         return tex.swiglu(input, quantizer)
+    
     def clamped_swiglu(
         self,
         input: torch.Tensor,
@@ -332,6 +397,7 @@ class CUDABackend(TEFLBackendBase):
     def dgelu(self, grad: torch.Tensor, fwd_input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
         return tex.dgelu(grad, fwd_input, quantizer)
+    
     def dgeglu(self, grad: torch.Tensor, fwd_input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
         return tex.dgeglu(grad, fwd_input, quantizer)
@@ -339,6 +405,7 @@ class CUDABackend(TEFLBackendBase):
     def dqgelu(self, grad: torch.Tensor, fwd_input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
         return tex.dqgelu(grad, fwd_input, quantizer)
+    
     def dqgeglu(self, grad: torch.Tensor, fwd_input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
         return tex.dqgeglu(grad, fwd_input, quantizer)
@@ -346,6 +413,7 @@ class CUDABackend(TEFLBackendBase):
     def drelu(self, grad: torch.Tensor, fwd_input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
         return tex.drelu(grad, fwd_input, quantizer)
+    
     def dreglu(self, grad: torch.Tensor, fwd_input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
         return tex.dreglu(grad, fwd_input, quantizer)
@@ -360,6 +428,7 @@ class CUDABackend(TEFLBackendBase):
     def dsilu(self, grad: torch.Tensor, fwd_input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
         return tex.dsilu(grad, fwd_input, quantizer)
+    
     def dswiglu(self, grad: torch.Tensor, fwd_input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
         return tex.dswiglu(grad, fwd_input, quantizer)
@@ -723,21 +792,79 @@ class CUDABackend(TEFLBackendBase):
         tex = self._get_tex()
         return tex.convert_bshd_to_thd(*args, **kwargs)
 
-    def fused_rope_forward(self, *args, **kwargs) -> Any:
+    @_convert_qkv_format_params
+    def fused_rope_forward(
+        self,
+        input: torch.Tensor,
+        freqs: torch.Tensor,
+        start_positions: Optional[torch.Tensor] = None,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cu_seqlens: Optional[torch.Tensor] = None,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> torch.Tensor:
         tex = self._get_tex()
-        return tex.fused_rope_forward(*args, **kwargs)
+        return tex.fused_rope_forward(
+            input, freqs, start_positions, qkv_format,
+            interleaved, cu_seqlens, cp_size, cp_rank
+        )
 
-    def fused_rope_backward(self, *args, **kwargs) -> Any:
+    @_convert_qkv_format_params
+    def fused_rope_backward(
+        self,
+        output_grads: torch.Tensor,
+        freqs: torch.Tensor,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cu_seqlens: Optional[torch.Tensor] = None,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> torch.Tensor:
         tex = self._get_tex()
-        return tex.fused_rope_backward(*args, **kwargs)
+        return tex.fused_rope_backward(
+            output_grads, freqs, qkv_format,
+            interleaved, cu_seqlens, cp_size, cp_rank
+        )
 
-    def fused_qkv_rope_forward(self, *args, **kwargs) -> Any:
+    @_convert_qkv_format_params
+    def fused_qkv_rope_forward(
+        self,
+        qkv_input: torch.Tensor,
+        q_freqs: torch.Tensor,
+        k_freqs: torch.Tensor,
+        start_positions: Optional[torch.Tensor] = None,
+        qkv_split_arg_list: list[int] = None,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         tex = self._get_tex()
-        return tex.fused_qkv_rope_forward(*args, **kwargs)
+        return tex.fused_qkv_rope_forward(
+            qkv_input, q_freqs, k_freqs, start_positions,
+            qkv_split_arg_list, qkv_format, interleaved, cp_size, cp_rank
+        )
 
-    def fused_qkv_rope_backward(self, *args, **kwargs) -> Any:
+    @_convert_qkv_format_params
+    def fused_qkv_rope_backward(
+        self,
+        q_grad_out: torch.Tensor,
+        k_grad_out: torch.Tensor,
+        v_grad_out: torch.Tensor,
+        q_freqs: torch.Tensor,
+        k_freqs: torch.Tensor,
+        qkv_split_arg_list: list[int] = None,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> torch.Tensor:
         tex = self._get_tex()
-        return tex.fused_qkv_rope_backward(*args, **kwargs)
+        return tex.fused_qkv_rope_backward(
+            q_grad_out, k_grad_out, v_grad_out, q_freqs, k_freqs,
+            qkv_split_arg_list, qkv_format, interleaved, cp_size, cp_rank
+        )
 
     def fused_topk_with_score_function_fwd(
         self,
