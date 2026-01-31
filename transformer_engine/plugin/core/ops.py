@@ -247,8 +247,23 @@ class TEFLBackendBase(ABC):
 
     def te_general_grouped_gemm(
         self,
-        *args,
-        **kwargs,
+        A: list[object],
+        transA: bool,
+        B: list[object],
+        transB: bool,
+        out: Optional[list[torch.Tensor]],
+        output_dtype: torch.dtype,
+        m_splits: list[int],
+        bias: list[torch.Tensor],
+        bias_type: Any,
+        single_output: bool,
+        gelu_input: list[torch.Tensor],
+        grad: bool,
+        workspace: list[torch.Tensor],
+        workspace_size: int,
+        accumulate: bool,
+        use_split_accumulator: bool,
+        sm_count: int,
     ) -> Any:
         raise NotImplementedError
 
@@ -665,30 +680,56 @@ class TEFLBackendBase(ABC):
 
     def fused_rope_forward(
         self,
-        *args,
-        **kwargs,
-    ) -> Any:
+        input: torch.Tensor,
+        freqs: torch.Tensor,
+        start_positions: Optional[torch.Tensor] = None,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cu_seqlens: Optional[torch.Tensor] = None,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> torch.Tensor:
         raise NotImplementedError
 
     def fused_rope_backward(
         self,
-        *args,
-        **kwargs,
-    ) -> Any:
+        output_grads: torch.Tensor,
+        freqs: torch.Tensor,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cu_seqlens: Optional[torch.Tensor] = None,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> torch.Tensor:
         raise NotImplementedError
 
     def fused_qkv_rope_forward(
         self,
-        *args,
-        **kwargs,
-    ) -> Any:
+        qkv_input: torch.Tensor,
+        q_freqs: torch.Tensor,
+        k_freqs: torch.Tensor,
+        start_positions: Optional[torch.Tensor] = None,
+        qkv_split_arg_list: list[int] = None,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         raise NotImplementedError
 
     def fused_qkv_rope_backward(
         self,
-        *args,
-        **kwargs,
-    ) -> Any:
+        q_grad_out: torch.Tensor,
+        k_grad_out: torch.Tensor,
+        v_grad_out: torch.Tensor,
+        q_freqs: torch.Tensor,
+        k_freqs: torch.Tensor,
+        qkv_split_arg_list: list[int] = None,
+        qkv_format: Any = None,
+        interleaved: bool = False,
+        cp_size: int = 1,
+        cp_rank: int = 0,
+    ) -> torch.Tensor:
         raise NotImplementedError
 
     def fused_topk_with_score_function_fwd(
