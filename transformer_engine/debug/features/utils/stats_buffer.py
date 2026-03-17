@@ -24,6 +24,15 @@ from transformer_engine.debug.features.utils.stats_computation import (
 from transformer_engine.debug.pytorch.debug_state import TEDebugState
 
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
+
 class _Buffer:
     """
     Buffer stores temporary statistics for one tensor for one layer.
@@ -41,14 +50,14 @@ class _Buffer:
         for stat in stats:
             self.stats_to_compute = self.stats_to_compute | DEPENDENCIES[stat]
 
-        self._buffer = torch.zeros(len(STATS), dtype=torch.float32).cuda()
+        self._buffer = torch.zeros(len(STATS), dtype=torch.float32).to(_te_device_type())
         self._new_buffer = self._buffer.clone()
         self._tmp_buffer = self._buffer.clone()
 
         # in case of data parallelism it is possible that layer will not be run on one node
         # modified is set to True if node is run
         # we do not take not run nodes into account
-        self.modified = torch.tensor([False], dtype=torch.bool).cuda()
+        self.modified = torch.tensor([False], dtype=torch.bool).to(_te_device_type())
         self.iteration = None
         self.skip_reduction = False
 

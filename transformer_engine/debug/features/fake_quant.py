@@ -22,6 +22,15 @@ from transformer_engine.pytorch.tensor.mxfp8_tensor import MXFP8Quantizer
 from transformer_engine.pytorch.quantization import _default_sf_compute
 
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
+
 def fake_quantize(tensor: torch.Tensor, fp8_format: tex.DType, out=None):
     """Input tensor is quantized to fp8 and then dequantized."""
 
@@ -30,7 +39,7 @@ def fake_quantize(tensor: torch.Tensor, fp8_format: tex.DType, out=None):
         torch.float16,
         torch.bfloat16,
     ), "[NVTORCH INSPECT ERROR] Unsupported tensor type."
-    assert tensor.is_cuda, "[NVTORCH INSPECT ERROR] Must be a GPU tensor."
+    assert tensor.device.type == _te_device_type(), f"[NVTORCH INSPECT ERROR] Must be a {_te_device_type()} tensor."
     assert fp8_format in {
         "FP8E4M3",
         "FP8E5M2",

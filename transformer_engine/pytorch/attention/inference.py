@@ -15,6 +15,14 @@ from transformer_engine.pytorch.cpp_extensions.fused_attn import QKVFormat
 
 __all__ = ["InferenceParams", "KVCacheManager", "NonPagedKVCacheManager", "PagedKVCacheManager"]
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
 
 class KVCacheManager:
     """Base KV cache manager"""
@@ -626,7 +634,7 @@ class PagedKVCacheManager(KVCacheManager):
         self.allocated_pages = defaultdict(list)
         # page table, [batch_size, max_pages_per_seq]
         self.page_table = torch.zeros(
-            self.max_batch_size, self.max_pages_per_seq, dtype=torch.int32, device="cuda"
+            self.max_batch_size, self.max_pages_per_seq, dtype=torch.int32, device=_te_device_type()
         )
 
     def reset(self):

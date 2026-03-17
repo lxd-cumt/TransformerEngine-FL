@@ -23,6 +23,15 @@ __all__ = [
 ]
 
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
+
 def validate_gemm_scale(scale: Optional[float], required: bool) -> float:
     """Validate whether a GEMM scaling factor is consistent with its usage"""
     if required:
@@ -189,7 +198,7 @@ def general_grouped_gemm(
     sm_count = get_sm_count()
     if grad and use_bias:
         grad_bias = [
-            torch.empty(B[i].shape[1], dtype=out[0].dtype, device="cuda") for i in range(num_gemms)
+            torch.empty(B[i].shape[1], dtype=out[0].dtype, device=_te_device_type()) for i in range(num_gemms)
         ]
     else:
         grad_bias = empty_tensors

@@ -41,6 +41,15 @@ _dpa_fp8_recipe_dpa = os.getenv("NVTE_DPA_FP8_RECIPE_DPA", "0") == "1"
 _dpa_fp8_recipe_mha = os.getenv("NVTE_DPA_FP8_RECIPE_MHA", "0") == "1"
 
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
+
 class MultiheadAttention(torch.nn.Module):
     r"""
     Multi-head Attention (MHA), including Query,
@@ -255,7 +264,7 @@ class MultiheadAttention(torch.nn.Module):
         ub_bulk_wgrad: bool = False,
         bias: bool = True,
         normalization: str = "LayerNorm",
-        device: Union[torch.device, str] = "cuda",
+        device: Union[torch.device, str] = _te_device_type(),
         qkv_format: str = "sbhd",
         name: str = None,
         qk_norm_type: Optional[str] = None,

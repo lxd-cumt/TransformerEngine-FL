@@ -43,6 +43,15 @@ warnings.filterwarnings("module", category=DeprecationWarning, module="transform
 __all__ = ["TransformerLayer"]
 
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
+
 class DropPath(torch.nn.Module):
     """Drop paths (Stochastic Depth) per sample
     (when applied in main path of residual blocks).
@@ -311,7 +320,7 @@ class TransformerLayer(torch.nn.Module):
         bias: bool = True,
         activation: str = "gelu",
         normalization: str = "LayerNorm",
-        device: Union[torch.device, str] = "cuda",
+        device: Union[torch.device, str] = _te_device_type(),
         attn_input_format: str = "sbhd",
         name: str = None,
         qk_norm_type: Optional[str] = None,

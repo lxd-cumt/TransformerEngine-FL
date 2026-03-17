@@ -26,6 +26,14 @@ from .quantized_tensor import QuantizedTensor, Quantizer, _IdentityFunc
 
 aten = torch.ops.aten
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
 
 def get_no_random_sign_vector() -> torch.Tensor:
     """Non-random sign vector for Hadamard transform."""
@@ -96,7 +104,7 @@ def get_rht_matrix(with_random_sign_mask: bool) -> torch.Tensor:
         signs = get_no_random_sign_vector()
     sign_matrix = signs * torch.eye(hadamard_dimension, dtype=torch.float32)
     rht_matrix = sign_matrix @ get_hadamard_matrix(hadamard_dimension)
-    return rht_matrix.to(dtype=torch.bfloat16).cuda()
+    return rht_matrix.to(dtype=torch.bfloat16).to(_te_device_type())
 
 
 @functools.lru_cache(maxsize=None)
@@ -267,7 +275,7 @@ class NVFP4Quantizer(Quantizer):
 
         # Canonicalize tensor attributes
         if device is None:
-            device = torch.device("cuda")
+            device = torch.device(_te_device_type())
 
         assert shape[-1] % NVFP4_BLOCK_SCALING_SIZE == 0, (
             f"Incorrect shape {shape} for NVFP4. Tensor dims must be divisible by"
@@ -617,7 +625,7 @@ class NVFP4Tensor(NVFP4TensorStorage, QuantizedTensor):
         """
 
         # Tensor device
-        new_device = tensor.device if tensor.is_cuda else self.device
+        new_device = tensor.device if tensor.device.type == _te_device_type() else self.device
         if not devices_match(new_device, tensor.device):
             tensor = tensor.to(device=new_device)
 

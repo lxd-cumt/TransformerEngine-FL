@@ -32,6 +32,14 @@ from ..op import (
     OperationContext,
 )
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
 
 class UserbuffersForwardLinear(FusedOperation):
     """Linear forward implementation using Userbuffers
@@ -156,7 +164,7 @@ class UserbuffersForwardLinear(FusedOperation):
         """
 
         # Check device
-        if device.type != "cuda":
+        if device.type != _te_device_type():
             raise ValueError(f"Only CUDA devices are supported (got {device})")
 
         # Check datatype
@@ -322,7 +330,7 @@ class UserbuffersForwardLinear(FusedOperation):
 
         # Get autocast dtype if needed
         if torch.is_autocast_enabled():
-            dtype = torch.get_autocast_dtype("cuda")
+            dtype = torch.get_autocast_dtype(_te_device_type())
         else:
             dtype = linear_op.weight.dtype
 

@@ -15,6 +15,15 @@ from .utils import gpu_autocast_ctx
 # pylint: disable=unnecessary-lambda-assignment
 
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
+
 def lazy_compile(func):
     """Lazy compile a function with torch.compile
 
@@ -277,9 +286,9 @@ def warmup_jit_bias_dropout_add(
     # Save cuda RNG state to ensure warmup does not affect reproducibility.
     rng_state = torch.cuda.get_rng_state()
 
-    inp = torch.rand((seq_length, micro_batch_size, hidden_size), dtype=dtype, device="cuda")
-    residual = torch.rand((seq_length, micro_batch_size, hidden_size), dtype=dtype, device="cuda")
-    bias = torch.rand((hidden_size), dtype=dtype, device="cuda")
+    inp = torch.rand((seq_length, micro_batch_size, hidden_size), dtype=dtype, device=_te_device_type())
+    residual = torch.rand((seq_length, micro_batch_size, hidden_size), dtype=dtype, device=_te_device_type())
+    bias = torch.rand((hidden_size), dtype=dtype, device=_te_device_type())
     dropout_rate = 0.1
     # Warmup JIT fusions with the input grad_enable state of both forward
     # prop and recomputation
@@ -314,11 +323,11 @@ def warmup_jit_bias_gelu(
     # Save cuda RNG state to ensure warmup does not affect reproducibility.
     rng_state = torch.cuda.get_rng_state()
 
-    bias = torch.rand(ffn_hidden_size_per_partition, dtype=dtype, device="cuda")
+    bias = torch.rand(ffn_hidden_size_per_partition, dtype=dtype, device=_te_device_type())
     inp = torch.rand(
         (seq_length * micro_batch_size, ffn_hidden_size_per_partition),
         dtype=dtype,
-        device="cuda",
+        device=_te_device_type(),
     )
     # Warmup JIT fusions with the input grad_enable state of both forward
     # prop and recomputation
@@ -352,7 +361,7 @@ def warmup_jit_l2normalization(
     inp = torch.rand(
         (seq_length * micro_batch_size, hidden_size),
         dtype=dtype,
-        device="cuda",
+        device=_te_device_type(),
     )
     eps = 1e-6
     # Warmup JIT fusions with the input grad_enable state of both forward

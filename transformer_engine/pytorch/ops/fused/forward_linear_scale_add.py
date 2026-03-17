@@ -20,6 +20,14 @@ from ..op import (
     OperationContext,
 )
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
 
 class ForwardLinearScaleAdd(FusedOperation):
     """Fused forward GEMM + scale + add
@@ -71,7 +79,7 @@ class ForwardLinearScaleAdd(FusedOperation):
 
         # Get autocast dtype if needed
         if torch.is_autocast_enabled():
-            dtype = torch.get_autocast_dtype("cuda")
+            dtype = torch.get_autocast_dtype(_te_device_type())
         else:
             dtype = linear_op.weight.dtype
 

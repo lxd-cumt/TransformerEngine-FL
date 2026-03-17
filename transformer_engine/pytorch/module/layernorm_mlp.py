@@ -85,6 +85,15 @@ from ...debug.pytorch.debug_state import TEDebugState
 __all__ = ["LayerNormMLP"]
 
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
+
 def _get_act_func_supported_list(recipe: Optional[Recipe] = None):
     if recipe is None:
         # bf16 (recipe is None):
@@ -1098,7 +1107,7 @@ class _LayerNormMLP(torch.autograd.Function):
             reduce_scatter_out = None
             if ctx.ub_overlap_rs_dgrad:
                 reduce_scatter_out = torch.empty(
-                    fc1_dgrad_shape, dtype=ctx.activation_dtype, device="cuda"
+                    fc1_dgrad_shape, dtype=ctx.activation_dtype, device=_te_device_type()
                 )
             if ctx.ub_bulk_wgrad:
                 gemm_out = ub_obj_fc1_wgrad.get_buffer(local_chunk=False)
@@ -1181,7 +1190,7 @@ class _LayerNormMLP(torch.autograd.Function):
                 reduce_scatter_out = None
                 if ctx.ub_bulk_wgrad and ub_obj_fc1_wgrad.is_fp8_ubuf():
                     reduce_scatter_out = torch.empty(
-                        fc1_dgrad_shape, dtype=ctx.activation_dtype, device="cuda"
+                        fc1_dgrad_shape, dtype=ctx.activation_dtype, device=_te_device_type()
                     )
 
                 # Arguments to include in wgrad GEMM closure

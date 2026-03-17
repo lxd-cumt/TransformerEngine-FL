@@ -10,6 +10,21 @@ import os
 from importlib import metadata
 import transformer_engine.common
 
+# Default device type for TE Python code paths that need a device string.
+# Vendor patches (e.g., MUSA) may override this during import-time initialization.
+import torch
+TE_DEVICE_TYPE = "cuda"
+TE_PLATFORM = torch.cuda
+
+# Apply MUSA (VENDOR) Patches, such as torch.cuda.device -> torch.musa.device
+try:
+    from .plugin.core.backends.vendor.musa.musa_patches import apply_patch as _musa_apply_patch
+    _musa_apply_patch()
+    print("[TE-FL] MUSA patches applied")
+except Exception as e:
+    print(f"[TE-FL] MUSA patches not applied: {e}")
+    pass
+
 try:
     from . import pytorch
 except ImportError:

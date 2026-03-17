@@ -18,13 +18,22 @@ THREADS_PER_BLOCK = 128
 _default_causal_mask = {}
 
 
+def _te_device_type(default="cuda"):
+    try:
+        import transformer_engine as te
+        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
+        return device_type
+    except Exception:
+        return default
+
+
 def _get_default_causal_mask(mask_type: str, sq: int, sk: int) -> torch.Tensor:
     """Return the causal upper triangular mask for softmax input"""
 
     def _get_mask():
         diagonal_offset = sk - sq + 1 if "bottom_right" in mask_type else 1
         return torch.triu(
-            torch.ones(sq, sk, dtype=torch.bool, device="cuda"), diagonal=diagonal_offset
+            torch.ones(sq, sk, dtype=torch.bool, device=_te_device_type()), diagonal=diagonal_offset
         )
 
     if is_in_onnx_export_mode():
