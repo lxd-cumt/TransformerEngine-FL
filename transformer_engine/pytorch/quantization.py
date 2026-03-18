@@ -46,6 +46,7 @@ __all__ = [
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:
@@ -288,7 +289,9 @@ class FP8GlobalStateManager:
     def set_skip_fp8_weight_update_tensor(cls, skip: bool) -> None:
         """`skip_fp8_weight_update_tensor` inplace setter."""
         if cls.skip_fp8_weight_update_tensor is None:
-            cls.skip_fp8_weight_update_tensor = torch.empty(1, dtype=torch.float32, device=_te_device_type())
+            cls.skip_fp8_weight_update_tensor = torch.empty(
+                1, dtype=torch.float32, device=_te_device_type()
+            )
         cls.skip_fp8_weight_update_tensor.fill_(skip)
 
     @classmethod

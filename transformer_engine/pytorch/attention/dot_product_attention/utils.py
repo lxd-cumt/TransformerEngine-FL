@@ -69,6 +69,7 @@ _cu_seqlens_cache = {}
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:
@@ -1329,7 +1330,9 @@ def get_full_mask(
     # apply SWA mask
     mask = torch.arange(max_seqlen_q, dtype=torch.int32, device=_te_device_type()).view(
         1, 1, max_seqlen_q, 1
-    ) - torch.arange(max_seqlen_kv, dtype=torch.int32, device=_te_device_type()).view(1, 1, 1, max_seqlen_kv)
+    ) - torch.arange(max_seqlen_kv, dtype=torch.int32, device=_te_device_type()).view(
+        1, 1, 1, max_seqlen_kv
+    )
     swa_left = None
     swa_right = None
     if attn_mask_type == "causal_bottom_right" or (
@@ -1460,7 +1463,9 @@ def get_alibi(
         _alibi_cache["_max_seqlen_q"], _alibi_cache["_max_seqlen_kv"] = max_seqlen_q, max_seqlen_kv
         _alibi_cache["_bottom_right_alignment"] = bottom_right_alignment
         bias_dtype = torch.float32 if bias_dtype is None else bias_dtype
-        _alibi_cache["_alibi_bias"] = bias.contiguous().to(dtype=bias_dtype, device=_te_device_type())
+        _alibi_cache["_alibi_bias"] = bias.contiguous().to(
+            dtype=bias_dtype, device=_te_device_type()
+        )
         _alibi_cache["_alibi_bias_require_update"] = False
 
     return _alibi_cache["_alibi_slopes"], _alibi_cache["_alibi_bias"]
@@ -1518,7 +1523,12 @@ def get_indices(max_seqlen: int, cu_seqlens: torch.Tensor) -> torch.Tensor:
     bs = len(cu_seqlens) - 1
     seqlens = cu_seqlens[1:] - cu_seqlens[:-1]
     indices = [i * max_seqlen + ii for i, j in enumerate(seqlens) for ii in range(j)]
-    indices = torch.Tensor(indices).unsqueeze(1).unsqueeze(1).to(dtype=torch.int64, device=_te_device_type())
+    indices = (
+        torch.Tensor(indices)
+        .unsqueeze(1)
+        .unsqueeze(1)
+        .to(dtype=torch.int64, device=_te_device_type())
+    )
 
     num_nonzeros = indices.shape[0]
     pad_amount = bs * max_seqlen - num_nonzeros

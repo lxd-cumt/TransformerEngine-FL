@@ -31,6 +31,7 @@ ALL_RECIPE_NAMES = ["fp8_delayed_scaling", "fp8_current_scaling", "mxfp8", "fp8_
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:
@@ -56,7 +57,10 @@ def _get_new_quantizer(recipe_name, fp8_dtype):
         return Float8BlockQuantizer(fp8_dtype=fp8_dtype, rowwise=True, columnwise=True)
     if recipe_name == "fp8_current_scaling":
         return Float8CurrentScalingQuantizer(
-            fp8_dtype=fp8_dtype, device=torch.device(_te_device_type()), rowwise=True, columnwise=True
+            fp8_dtype=fp8_dtype,
+            device=torch.device(_te_device_type()),
+            rowwise=True,
+            columnwise=True,
         )
     if recipe_name == "mxfp8":
         return MXFP8Quantizer(fp8_dtype=fp8_dtype, rowwise=True, columnwise=True)

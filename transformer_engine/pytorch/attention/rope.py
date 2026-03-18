@@ -18,6 +18,7 @@ __all__ = ["RotaryPositionEmbedding", "apply_rotary_pos_emb", "apply_fused_qkv_r
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:

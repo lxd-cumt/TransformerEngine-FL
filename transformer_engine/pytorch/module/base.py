@@ -68,10 +68,12 @@ layers_atomic_ring_exchange = []
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:
         return default
+
 
 class UserBufferQuantizationMode(Enum):
     """
@@ -95,7 +97,9 @@ def get_workspace() -> torch.Tensor:
     global _cublas_workspace
     if _cublas_workspace is None:
         _cublas_workspace = torch.empty(
-            get_cublas_workspace_size_bytes(), dtype=torch.uint8, device=_te_device_type(),
+            get_cublas_workspace_size_bytes(),
+            dtype=torch.uint8,
+            device=_te_device_type(),
         )
     return _cublas_workspace
 
@@ -106,7 +110,9 @@ def get_multi_stream_cublas_workspace() -> List[torch.Tensor]:
     if not _multi_stream_cublas_workspace:
         for _ in range(tex.get_num_cublas_streams()):
             _multi_stream_cublas_workspace.append(
-                torch.empty(get_cublas_workspace_size_bytes(), dtype=torch.uint8, device=_te_device_type())
+                torch.empty(
+                    get_cublas_workspace_size_bytes(), dtype=torch.uint8, device=_te_device_type()
+                )
             )
     return _multi_stream_cublas_workspace
 
@@ -290,7 +296,9 @@ def initialize_ub(
     elif _cublas_workspace.numel() != get_cublas_workspace_size_bytes() * _NUM_MAX_UB_STREAMS:
         # This ensures we don't do `.repeat()` on an already expanded workspace
         _cublas_workspace = torch.empty(
-            get_cublas_workspace_size_bytes(), dtype=torch.uint8, device=_te_device_type(),
+            get_cublas_workspace_size_bytes(),
+            dtype=torch.uint8,
+            device=_te_device_type(),
         ).repeat(_NUM_MAX_UB_STREAMS)
 
     # Default buffer precision: AllGather buffers use fp8 when using fp8 recipe
@@ -649,6 +657,7 @@ class TransformerEngineBaseModule(torch.nn.Module, ABC):
     def __init__(self) -> None:
         super().__init__()
         from transformer_engine import TE_PLATFORM, TE_DEVICE_TYPE
+
         assert TE_PLATFORM.is_available(), f"TransformerEngine needs {TE_DEVICE_TYPE}."
         self.name = None
         self.next_iter_when_debug_should_be_run = 0
@@ -1089,7 +1098,9 @@ class TransformerEngineBaseModule(torch.nn.Module, ABC):
         if self.fp8 and in_fp8_activation_recompute_phase():
             FP8GlobalStateManager.get_old_fp8_meta_tensors_for_recompute(self.fp8_meta)
         else:
-            assert inp.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
+            assert (
+                inp.device.type == _te_device_type()
+            ), f"TransformerEngine needs {_te_device_type()}."
 
             if self.tp_size > 1:
                 assert self.tp_group_initialized, "TP group not initialized."

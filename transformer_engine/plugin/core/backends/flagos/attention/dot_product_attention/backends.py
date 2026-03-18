@@ -39,10 +39,12 @@ import flag_gems
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:
         return default
+
 
 class AttnFuncFL(torch.autograd.Function):
     @staticmethod
@@ -291,7 +293,9 @@ class FlashAttentionFL(FlashAttentionBase):
             for x in [query_layer, key_layer, value_layer]
         ), "FLAttention only supports FP16 and BF16 data types, or Float8Tensors."
         assert (
-            query_layer.device.type == _te_device_type() and key_layer.device.type == _te_device_type() and value_layer.device.type == _te_device_type()
+            query_layer.device.type == _te_device_type()
+            and key_layer.device.type == _te_device_type()
+            and value_layer.device.type == _te_device_type()
         ), f"FLAttention only supports {_te_device_type()} tensors."
         assert qkv_layout in QKVLayouts, f"FLAttention does not support qkv_layout = {qkv_layout}!"
 

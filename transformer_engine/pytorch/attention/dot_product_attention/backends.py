@@ -144,6 +144,7 @@ _dpa_fp8_cs_o_in_f16 = os.getenv("NVTE_DPA_FP8CS_O_in_F16", "1") == "1"
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:
@@ -685,7 +686,9 @@ class FlashAttention(torch.nn.Module):
             for x in [query_layer, key_layer, value_layer]
         ), "FlashAttention only supports FP16 and BF16 data types, or Float8Tensors."
         assert (
-            query_layer.device.type == _te_device_type() and key_layer.device.type == _te_device_type() and value_layer.device.type == _te_device_type()
+            query_layer.device.type == _te_device_type()
+            and key_layer.device.type == _te_device_type()
+            and value_layer.device.type == _te_device_type()
         ), f"FlashAttention currently only supports {_te_device_type()} tensors."
         assert (
             qkv_layout in QKVLayouts
@@ -1747,7 +1750,9 @@ class FusedAttention(torch.nn.Module):
             for x in [query_layer, key_layer, value_layer]
         ), "FusedAttention only supports FP16 and BF16 data types, or Float8Tensors."
         assert (
-            query_layer.device.type == _te_device_type() and key_layer.device.type == _te_device_type() and value_layer.device.type == _te_device_type()
+            query_layer.device.type == _te_device_type()
+            and key_layer.device.type == _te_device_type()
+            and value_layer.device.type == _te_device_type()
         ), f"FusedAttention only supports {_te_device_type()} tensors."
         assert (
             qkv_layout in QKVLayouts

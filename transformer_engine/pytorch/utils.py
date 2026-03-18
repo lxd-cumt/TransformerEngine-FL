@@ -22,6 +22,7 @@ __all__ = ["get_device_compute_capability", "get_cudnn_version", "is_bf16_availa
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:
@@ -40,6 +41,7 @@ def requires_grad(*tensors: Tuple[Optional[torch.Tensor], ...]) -> None:
 def _empty_tensor() -> torch.Tensor:
     """Get tensor with no entries and no data"""
     from transformer_engine import TE_DEVICE_TYPE
+
     return torch.Tensor().to(device=TE_DEVICE_TYPE)
 
 

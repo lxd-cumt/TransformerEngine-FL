@@ -15,9 +15,11 @@ from transformer_engine.pytorch.cpp_extensions.fused_attn import QKVFormat
 
 __all__ = ["InferenceParams", "KVCacheManager", "NonPagedKVCacheManager", "PagedKVCacheManager"]
 
+
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:

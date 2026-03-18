@@ -166,6 +166,7 @@ __all__ = ["DotProductAttention"]
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:
@@ -434,7 +435,9 @@ class DotProductAttention(TransformerEngineBaseModule):
         if self.softmax_type == "learnable":
             self.register_parameter(
                 "softmax_offset",
-                Parameter(torch.empty(self.num_attention_heads // self.tp_size, device=_te_device_type())),
+                Parameter(
+                    torch.empty(self.num_attention_heads // self.tp_size, device=_te_device_type())
+                ),
                 get_rng_state_tracker=get_rng_state_tracker,
             )
 
@@ -1035,6 +1038,7 @@ class DotProductAttention(TransformerEngineBaseModule):
 
             # checks for q/k/v shapes
             from transformer_engine import TE_DEVICE_TYPE
+
             assert (
                 query_layer.device.type == TE_DEVICE_TYPE
                 and key_layer.device.type == TE_DEVICE_TYPE

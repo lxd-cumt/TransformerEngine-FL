@@ -25,6 +25,7 @@ __all__ = [
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:
@@ -52,7 +53,9 @@ class _moe_permute_index_map(torch.autograd.Function):
 
         # Device check
         assert inp.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
-        assert index.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
+        assert (
+            index.device.type == _te_device_type()
+        ), f"TransformerEngine needs {_te_device_type()}."
         # Shape check
         assert inp.size(0) == index.size(0), "Permute not possible"
 
@@ -128,7 +131,9 @@ class _moe_unpermute_index_map(torch.autograd.Function):
 
         # None probs check
         if probs is not None:
-            assert probs.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
+            assert (
+                probs.device.type == _te_device_type()
+            ), f"TransformerEngine needs {_te_device_type()}."
 
             if probs.dtype != torch.float32:
                 warnings.warn(
@@ -146,7 +151,9 @@ class _moe_unpermute_index_map(torch.autograd.Function):
 
         # Device check
         assert inp.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
-        assert row_id_map.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
+        assert (
+            row_id_map.device.type == _te_device_type()
+        ), f"TransformerEngine needs {_te_device_type()}."
 
         # Data type check
         dtype = TE_DType[inp.dtype]
@@ -207,9 +214,13 @@ class _moe_permute_mask_map(torch.autograd.Function):
             return inp, torch.tensor([], device=inp.device), torch.tensor([], device=inp.device)
 
         assert inp.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
-        assert routing_map.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
+        assert (
+            routing_map.device.type == _te_device_type()
+        ), f"TransformerEngine needs {_te_device_type()}."
         if probs is not None:
-            assert probs.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
+            assert (
+                probs.device.type == _te_device_type()
+            ), f"TransformerEngine needs {_te_device_type()}."
 
         assert inp.size(0) == routing_map.size(0), "Permute not possible"
         num_tokens, hidden_size = inp.size()
@@ -362,11 +373,15 @@ class _moe_unpermute_mask_map(torch.autograd.Function):
 
         with_probs = merging_probs is not None
         if with_probs:
-            assert merging_probs.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
+            assert (
+                merging_probs.device.type == _te_device_type()
+            ), f"TransformerEngine needs {_te_device_type()}."
 
         # Device check
         assert inp.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
-        assert row_id_map.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
+        assert (
+            row_id_map.device.type == _te_device_type()
+        ), f"TransformerEngine needs {_te_device_type()}."
 
         assert not isinstance(
             inp, QuantizedTensor
@@ -645,10 +660,16 @@ class _moe_chunk_sort(torch.autograd.Function):
             return inp, probs
 
         assert inp.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
-        assert split_sizes.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
-        assert sorted_idxs.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
+        assert (
+            split_sizes.device.type == _te_device_type()
+        ), f"TransformerEngine needs {_te_device_type()}."
+        assert (
+            sorted_idxs.device.type == _te_device_type()
+        ), f"TransformerEngine needs {_te_device_type()}."
         if probs is not None:
-            assert probs.device.type == _te_device_type(), f"TransformerEngine needs {_te_device_type()}."
+            assert (
+                probs.device.type == _te_device_type()
+            ), f"TransformerEngine needs {_te_device_type()}."
 
         num_tokens, hidden_size = inp.shape
         num_splits = split_sizes.size(0)

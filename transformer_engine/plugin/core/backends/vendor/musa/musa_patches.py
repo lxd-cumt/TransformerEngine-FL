@@ -1,5 +1,4 @@
-"""Python-side compatibility patches for the MUSA vendor backend.
-"""
+"""Python-side compatibility patches for the MUSA vendor backend."""
 
 from __future__ import annotations
 
@@ -7,8 +6,10 @@ from collections.abc import Callable
 
 import torch
 
+
 def _noop(*args, **kwargs):
     return None
+
 
 # Patches: (parent_object, attribute_name, replacement_callable)
 _PATCH_CALLS: list[tuple[object, str, Callable[..., object]]] = [
@@ -31,6 +32,7 @@ def apply_patch() -> None:
     """Apply MUSA Python-side patches (idempotent, best-effort)."""
     try:
         from .musa import MUSABackend
+
         if not MUSABackend().is_available():
             return
     except Exception as e:
@@ -65,4 +67,3 @@ def apply_patch() -> None:
         except Exception:
             # Best-effort: patching should never crash import/initialization.
             continue
-

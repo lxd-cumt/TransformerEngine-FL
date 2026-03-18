@@ -27,6 +27,7 @@ from transformer_engine.debug.pytorch.debug_state import TEDebugState
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:

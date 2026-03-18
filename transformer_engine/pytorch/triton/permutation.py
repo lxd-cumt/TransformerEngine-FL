@@ -21,6 +21,7 @@ from triton.language.standard import _log2
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:
@@ -227,7 +228,9 @@ def make_row_id_map(
         The [num_experts, num_experts + n_routed) items are the indices of the experts corresponding
         to the first n_routed row indices above.
     """
-    row_id_map = torch.empty((num_tokens, num_experts * 2 + 1), dtype=torch.int32, device=_te_device_type())
+    row_id_map = torch.empty(
+        (num_tokens, num_experts * 2 + 1), dtype=torch.int32, device=_te_device_type()
+    )
     block_size = 1024
     grid = (num_experts, triton.cdiv(num_tokens, block_size))
     workspace_tensor = torch.empty(grid, dtype=torch.int32, device=_te_device_type())

@@ -25,9 +25,11 @@ from .quantized_tensor import (
 
 aten = torch.ops.aten
 
+
 def _te_device_type(default="cuda"):
     try:
         import transformer_engine as te
+
         device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
         return device_type
     except Exception:
