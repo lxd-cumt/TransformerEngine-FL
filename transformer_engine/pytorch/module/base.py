@@ -648,7 +648,8 @@ class TransformerEngineBaseModule(torch.nn.Module, ABC):
 
     def __init__(self) -> None:
         super().__init__()
-        assert torch.musa.is_available(), "TransformerEngine needs MUSA."
+        from transformer_engine import TE_PLATFORM, TE_DEVICE_TYPE
+        assert TE_PLATFORM.is_available(), f"TransformerEngine needs {TE_DEVICE_TYPE}."
         self.name = None
         self.next_iter_when_debug_should_be_run = 0
         self.fp8_initialized = False
