@@ -243,7 +243,7 @@ class FlagOSBackend(TEFLBackendBase):
         return 90000
 
     def get_num_cublas_streams(self) -> int:
-        return 0
+        return 4  # keep consistent with transformer_engine/common/util/multi_stream.cpp, get_num_compute_streams()
 
     ############## class func #################################
     def get_flash_attention_class(self):

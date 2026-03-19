@@ -476,7 +476,7 @@ class ReferenceBackend(TEFLBackendBase):
         return 0
 
     def get_num_cublas_streams(self) -> int:
-        return 0
+        return 4  # keep consistent with transformer_engine/common/util/multi_stream.cpp, get_num_compute_streams()
 
     # Multi-tensor functions
     def multi_tensor_scale(
