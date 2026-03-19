@@ -8,21 +8,12 @@ from functools import wraps
 from typing import Callable, Optional, Tuple
 import torch
 
+from transformer_engine import te_device_type
 from . import torch_version
 from .export import is_in_onnx_export_mode
 from .utils import gpu_autocast_ctx
 
 # pylint: disable=unnecessary-lambda-assignment
-
-
-def te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
 
 
 def lazy_compile(func):
