@@ -45,6 +45,7 @@ def apply_patch() -> None:
     # imports this module to run patches and that would cause a circular import.
     try:
         import transformer_engine
+
         transformer_engine.TE_DEVICE_TYPE = "musa"
         transformer_engine.TE_PLATFORM = torch.musa
     except Exception as e:
