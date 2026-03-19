@@ -15,14 +15,7 @@ from ...utils import canonicalize_device, canonicalize_dtype
 from ...tensor import Quantizer
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class Bias(BasicOperation):
@@ -104,7 +97,7 @@ class Bias(BasicOperation):
 
         # Make sure parameter is initialized
         bias = self.bias
-        if bias.device.type != _te_device_type():
+        if bias.device.type != te_device_type():
             bias = torch.empty_like(bias, device=self.device)
         else:
             bias = bias.to(device=self.device)

@@ -163,14 +163,7 @@ _dpa_fp8ds_reduce_amax = os.getenv("NVTE_DPA_FP8DS_REDUCE_AMAX", "1") == "1"
 __all__ = ["DotProductAttention"]
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class DotProductAttention(TransformerEngineBaseModule):
@@ -430,13 +423,13 @@ class DotProductAttention(TransformerEngineBaseModule):
             self.softmax_offset = None
         if self.softmax_type == "off-by-one":
             self.softmax_offset = torch.zeros(
-                self.num_attention_heads // self.tp_size, device=_te_device_type()
+                self.num_attention_heads // self.tp_size, device=te_device_type()
             )
         if self.softmax_type == "learnable":
             self.register_parameter(
                 "softmax_offset",
                 Parameter(
-                    torch.empty(self.num_attention_heads // self.tp_size, device=_te_device_type())
+                    torch.empty(self.num_attention_heads // self.tp_size, device=te_device_type())
                 ),
                 get_rng_state_tracker=get_rng_state_tracker,
             )
@@ -1037,13 +1030,11 @@ class DotProductAttention(TransformerEngineBaseModule):
                 fp8_output = False
 
             # checks for q/k/v shapes
-            from transformer_engine import TE_DEVICE_TYPE
-
             assert (
-                query_layer.device.type == TE_DEVICE_TYPE
-                and key_layer.device.type == TE_DEVICE_TYPE
-                and value_layer.device.type == TE_DEVICE_TYPE
-            ), f"DotProductAttention only supports {TE_DEVICE_TYPE} tensors."
+                query_layer.device.type == te_device_type()
+                and key_layer.device.type == te_device_type()
+                and value_layer.device.type == te_device_type()
+            ), f"DotProductAttention only supports {te_device_type()} tensors."
             assert (
                 query_layer.dtype == key_layer.dtype and query_layer.dtype == value_layer.dtype
             ), "Queries, keys and values must have the same data type!"

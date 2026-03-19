@@ -66,14 +66,7 @@ _print_rank = int(os.getenv("NVTE_PRINT_RANK", "0"))
 _cu_seqlens_cache = {}
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class AttentionLogging:
@@ -1203,13 +1196,13 @@ def get_padding_mask(
                 ],
                 dim=0,
             )
-    attention_mask_q = attention_mask_q.to(device=_te_device_type())
+    attention_mask_q = attention_mask_q.to(device=te_device_type())
     if attention_type == "self":
         attention_mask = attention_mask_q
     else:
         attention_mask = (
             attention_mask_q,
-            attention_mask_kv.to(device=_te_device_type()),
+            attention_mask_kv.to(device=te_device_type()),
         )
     return attention_mask
 
@@ -1328,9 +1321,9 @@ def get_full_mask(
         actual_seqlens_kv = m[:, 0, 0, :].sum(dim=1)
 
     # apply SWA mask
-    mask = torch.arange(max_seqlen_q, dtype=torch.int32, device=_te_device_type()).view(
+    mask = torch.arange(max_seqlen_q, dtype=torch.int32, device=te_device_type()).view(
         1, 1, max_seqlen_q, 1
-    ) - torch.arange(max_seqlen_kv, dtype=torch.int32, device=_te_device_type()).view(
+    ) - torch.arange(max_seqlen_kv, dtype=torch.int32, device=te_device_type()).view(
         1, 1, 1, max_seqlen_kv
     )
     swa_left = None
@@ -1428,7 +1421,7 @@ def get_alibi(
                 m_hat = torch.pow(m_hat_0, torch.arange(1, 1 + 2 * (num_heads - n), 2))
                 m = torch.cat([m, m_hat])
 
-            _alibi_cache["_alibi_slopes"] = m.to(dtype=torch.float32, device=_te_device_type())
+            _alibi_cache["_alibi_slopes"] = m.to(dtype=torch.float32, device=te_device_type())
         _alibi_cache["_num_heads"] = num_heads
         _alibi_cache["_alibi_slopes_require_update"] = False
 
@@ -1441,9 +1434,9 @@ def get_alibi(
         else:
             raise ValueError("ALiBi slopes cannot exceed 2 dimensions.")
 
-        bias = torch.arange(max_seqlen_q, dtype=torch.int32, device=_te_device_type()).view(
+        bias = torch.arange(max_seqlen_q, dtype=torch.int32, device=te_device_type()).view(
             1, 1, max_seqlen_q, 1
-        ) - torch.arange(max_seqlen_kv, dtype=torch.int32, device=_te_device_type()).view(
+        ) - torch.arange(max_seqlen_kv, dtype=torch.int32, device=te_device_type()).view(
             1, 1, 1, max_seqlen_kv
         )
         if actual_seqlens_q is None and actual_seqlens_kv is None:
@@ -1464,7 +1457,7 @@ def get_alibi(
         _alibi_cache["_bottom_right_alignment"] = bottom_right_alignment
         bias_dtype = torch.float32 if bias_dtype is None else bias_dtype
         _alibi_cache["_alibi_bias"] = bias.contiguous().to(
-            dtype=bias_dtype, device=_te_device_type()
+            dtype=bias_dtype, device=te_device_type()
         )
         _alibi_cache["_alibi_bias_require_update"] = False
 
@@ -1480,7 +1473,7 @@ def get_cu_seqlens(mask: torch.Tensor) -> torch.Tensor:
     mask = mask.squeeze(1).squeeze(1)
     reduced_mask = mask.logical_not().sum(dim=1)
     cu_seqlens = reduced_mask.cumsum(dim=0).to(torch.int32)
-    zero = torch.zeros(1, dtype=torch.int32, device=_te_device_type())
+    zero = torch.zeros(1, dtype=torch.int32, device=te_device_type())
     cu_seqlens = torch.cat((zero, cu_seqlens))
 
     return cu_seqlens
@@ -1498,7 +1491,7 @@ def get_cu_seqlens_and_indices(mask: torch.Tensor) -> Tuple[torch.Tensor, torch.
 
     reduced_mask = mask.logical_not().sum(dim=1)
     cu_seqlens = reduced_mask.cumsum(dim=0).to(torch.int32)
-    zero = torch.zeros(1, dtype=torch.int32, device=_te_device_type())
+    zero = torch.zeros(1, dtype=torch.int32, device=te_device_type())
     cu_seqlens = torch.cat((zero, cu_seqlens))
 
     mask = mask.reshape(-1)
@@ -1527,7 +1520,7 @@ def get_indices(max_seqlen: int, cu_seqlens: torch.Tensor) -> torch.Tensor:
         torch.Tensor(indices)
         .unsqueeze(1)
         .unsqueeze(1)
-        .to(dtype=torch.int64, device=_te_device_type())
+        .to(dtype=torch.int64, device=te_device_type())
     )
 
     num_nonzeros = indices.shape[0]

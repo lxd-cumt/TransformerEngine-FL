@@ -24,14 +24,7 @@ from ..utils import devices_match, round_up_to_nearest_multiple
 aten = torch.ops.aten
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class Float8BlockQuantizer(Quantizer):
@@ -230,7 +223,7 @@ class Float8BlockQuantizer(Quantizer):
     ) -> Float8BlockwiseQTensor:
         """Construct quantized tensor with uninitialized data"""
         if device is None:
-            device = torch.device(_te_device_type())
+            device = torch.device(te_device_type())
 
         data_format = (
             tex.Float8BlockScaleTensorFormat.COMPACT
@@ -461,7 +454,7 @@ class Float8BlockwiseQTensor(Float8BlockwiseQTensorStorage, QuantizedTensor):
                 qt._rowwise_scale_inv,
                 qt._columnwise_scale_inv,
             ):
-                if t is not None and t.device.type == _te_device_type():
+                if t is not None and t.device.type == te_device_type():
                     t.record_stream(stream)
             return None
 
@@ -552,7 +545,7 @@ class Float8BlockwiseQTensor(Float8BlockwiseQTensorStorage, QuantizedTensor):
 
         """
         # Tensor device
-        new_device = tensor.device if tensor.device.type == _te_device_type() else self.device
+        new_device = tensor.device if tensor.device.type == te_device_type() else self.device
 
         def _set_from_tensor(dst: Float8BlockwiseQTensor, src: Float8BlockwiseQTensor):
             dst._rowwise_data = src._rowwise_data

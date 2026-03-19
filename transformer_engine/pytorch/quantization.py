@@ -43,14 +43,7 @@ __all__ = [
 ]
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 @functools.lru_cache(maxsize=None)
@@ -290,7 +283,7 @@ class FP8GlobalStateManager:
         """`skip_fp8_weight_update_tensor` inplace setter."""
         if cls.skip_fp8_weight_update_tensor is None:
             cls.skip_fp8_weight_update_tensor = torch.empty(
-                1, dtype=torch.float32, device=_te_device_type()
+                1, dtype=torch.float32, device=te_device_type()
             )
         cls.skip_fp8_weight_update_tensor.fill_(skip)
 
@@ -1079,7 +1072,7 @@ class DelayedScalingRecipeState(RecipeState):
 
         # Allocate buffers
         if device is None:
-            device = torch.device(_te_device_type())
+            device = torch.device(te_device_type())
         self.scale = torch.ones(num_quantizers, dtype=torch.float32, device=device)
         self.amax_history = torch.zeros(
             recipe.amax_history_len,
@@ -1125,7 +1118,7 @@ class Float8CurrentScalingRecipeState(RecipeState):
 
         # Allocate buffers
         if device is None:
-            device = torch.device(_te_device_type())
+            device = torch.device(te_device_type())
         self.device = device
 
     def make_quantizers(self) -> list:
@@ -1165,7 +1158,7 @@ class MXFP8BlockScalingRecipeState(RecipeState):
 
         # Allocate buffers
         if device is None:
-            device = torch.device(_te_device_type())
+            device = torch.device(te_device_type())
 
     def make_quantizers(self) -> list:
         # TODO(ksivamani); Find better design for this, adding here to avoid circular import.
@@ -1204,7 +1197,7 @@ class Float8BlockScalingRecipeState(RecipeState):
 
         # Allocate buffers
         if device is None:
-            device = torch.device(_te_device_type())
+            device = torch.device(te_device_type())
         self.device = device
 
     def make_quantizers(self) -> list:
@@ -1305,7 +1298,7 @@ class NVFP4BlockScalingRecipeState(RecipeState):
 
         # Allocate buffers
         if device is None:
-            device = torch.device(_te_device_type())
+            device = torch.device(te_device_type())
 
     def make_quantizers(self) -> list:
         from .tensor.nvfp4_tensor import NVFP4Quantizer
@@ -1375,7 +1368,7 @@ class CustomRecipeState(RecipeState):
         self.mode = mode
         self.num_quantizers = num_quantizers
         if device is None:
-            device = torch.device(_te_device_type())
+            device = torch.device(te_device_type())
         self.device = device
 
         if getattr(recipe, "qfactory", None) is None:

@@ -29,14 +29,7 @@ from .._common import maybe_dequantize, is_quantized_tensor
 from ..op import FusedOperation, FusibleOperation, OperationContext
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class UserbuffersBackwardLinear(FusedOperation):
@@ -186,7 +179,7 @@ class UserbuffersBackwardLinear(FusedOperation):
             else:
                 device = grad_output.device
         device = canonicalize_device(device)
-        if device.type != _te_device_type():
+        if device.type != te_device_type():
             raise ValueError(f"Only CUDA devices are supported (got {device})")
 
         # Check datatype

@@ -15,6 +15,8 @@ import transformer_engine_torch as tex
 from transformer_engine.pytorch.tensor.float8_tensor import Float8Tensor, Float8Quantizer
 from .multi_tensor_apply import multi_tensor_applier
 
+from transformer_engine import te_device_type
+
 
 def get_fp8_meta(fp8_tensor):
     """FP8 metadata getter."""
@@ -178,9 +180,7 @@ class FusedAdam(torch.optim.Optimizer):
             self._step_supports_amp_scaling = True
 
         # Skip buffer
-        from transformer_engine import TE_DEVICE_TYPE
-
-        self._dummy_overflow_buf = torch.tensor([0], dtype=torch.int, device=TE_DEVICE_TYPE)
+        self._dummy_overflow_buf = torch.tensor([0], dtype=torch.int, device=te_device_type())
         self.multi_tensor_adam = tex.multi_tensor_adam
         self.multi_tensor_adam_param_remainder = tex.multi_tensor_adam_param_remainder
         self.multi_tensor_adam_fp8 = tex.multi_tensor_adam_fp8

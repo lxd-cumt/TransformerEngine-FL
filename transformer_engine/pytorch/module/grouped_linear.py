@@ -53,14 +53,7 @@ from ..tensor.quantized_tensor import (
 __all__ = ["GroupedLinear"]
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class _GroupedLinear(torch.autograd.Function):
@@ -591,7 +584,7 @@ class GroupedLinear(TransformerEngineBaseModule):
         return_bias: bool = False,
         params_dtype: Optional[torch.dtype] = None,
         parallel_mode: Optional[str] = None,
-        device: Union[torch.device, str] = _te_device_type(),
+        device: Union[torch.device, str] = te_device_type(),
         ub_overlap_rs: bool = False,
         ub_overlap_ag: bool = False,
         ub_name: Optional[str] = None,

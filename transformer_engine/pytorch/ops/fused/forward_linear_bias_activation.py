@@ -17,14 +17,7 @@ from ..basic import BasicLinear, Bias
 from ..op import FusedOperation, FusibleOperation, OperationContext
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class ForwardLinearBiasActivation(FusedOperation):
@@ -105,7 +98,7 @@ class ForwardLinearBiasActivation(FusedOperation):
 
         # Get autocast dtype if needed
         if torch.is_autocast_enabled():
-            dtype = torch.get_autocast_dtype(_te_device_type())
+            dtype = torch.get_autocast_dtype(te_device_type())
         else:
             dtype = linear_op.weight.dtype
 

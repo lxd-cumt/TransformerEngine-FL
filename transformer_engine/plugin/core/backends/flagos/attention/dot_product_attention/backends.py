@@ -36,7 +36,7 @@ from transformer_engine.plugin.core.ops import FlashAttentionBase
 import flag_gems
 
 
-def _te_device_type(default="cuda"):
+def te_device_type(default="cuda"):
     try:
         import transformer_engine as te
 
@@ -293,10 +293,10 @@ class FlashAttentionFL(FlashAttentionBase):
             for x in [query_layer, key_layer, value_layer]
         ), "FLAttention only supports FP16 and BF16 data types, or Float8Tensors."
         assert (
-            query_layer.device.type == _te_device_type()
-            and key_layer.device.type == _te_device_type()
-            and value_layer.device.type == _te_device_type()
-        ), f"FLAttention only supports {_te_device_type()} tensors."
+            query_layer.device.type == te_device_type()
+            and key_layer.device.type == te_device_type()
+            and value_layer.device.type == te_device_type()
+        ), f"FLAttention only supports {te_device_type()} tensors."
         assert qkv_layout in QKVLayouts, f"FLAttention does not support qkv_layout = {qkv_layout}!"
 
         cp_size = 1

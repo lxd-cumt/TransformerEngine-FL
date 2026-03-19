@@ -46,14 +46,7 @@ def _wait_async(handle: Optional[Any]) -> None:
         handle.wait()
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class BasicLinear(BasicOperation):
@@ -977,7 +970,7 @@ class BasicLinear(BasicOperation):
 
         # Get autocast dtype if needed
         if torch.is_autocast_enabled():
-            dtype = torch.get_autocast_dtype(_te_device_type())
+            dtype = torch.get_autocast_dtype(te_device_type())
         else:
             dtype = self.weight.dtype
 

@@ -68,14 +68,7 @@ _FP8_ACTIVATION_RECOMPUTE_PHASE = False
 _ALL_ACTIVE_RNG_STATES = {}
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 def get_all_rng_states() -> bool:
@@ -100,7 +93,7 @@ def graph_safe_rng_available() -> bool:
 
 
 def _get_cuda_rng_state(
-    device: Union[int, str, torch.device] = _te_device_type(),
+    device: Union[int, str, torch.device] = te_device_type(),
     clone: bool = False,
     graph_safe: bool = True,
 ) -> torch.Tensor:
@@ -110,7 +103,7 @@ def _get_cuda_rng_state(
     if isinstance(device, str):
         device = torch.device(device)
     elif isinstance(device, int):
-        device = torch.device(_te_device_type(), device)
+        device = torch.device(te_device_type(), device)
     idx = device.index
     if idx is None:
         idx = torch.cuda.current_device()
@@ -132,11 +125,11 @@ def _set_cuda_rng_state(
     """Sets the random number generator state of the current GPU."""
 
     if device == -1:
-        device = torch.device(_te_device_type())
+        device = torch.device(te_device_type())
     elif isinstance(device, str):
         device = torch.device(device)
     elif isinstance(device, int):
-        device = torch.device(_te_device_type(), device)
+        device = torch.device(te_device_type(), device)
 
     def cb() -> None:
         idx = device.index
@@ -290,10 +283,10 @@ def _get_active_autocast_contexts():
     autocast_cached = torch.is_autocast_cache_enabled()
 
     if torch_version() >= (2, 4, 0):
-        gpu_autocast_enabled = torch.is_autocast_enabled(_te_device_type())
-        gpu_autocast_dtype = torch.get_autocast_dtype(_te_device_type())
+        gpu_autocast_enabled = torch.is_autocast_enabled(te_device_type())
+        gpu_autocast_dtype = torch.get_autocast_dtype(te_device_type())
         gpu_autocast_ctx = torch.amp.autocast(
-            _te_device_type(),
+            te_device_type(),
             enabled=gpu_autocast_enabled,
             dtype=gpu_autocast_dtype,
             cache_enabled=autocast_cached,
@@ -953,7 +946,7 @@ def _all_gather_fp8(
     out: Float8TensorStorage
     if quantizer is not None:
         dtype = torch.float32
-        device = _te_device_type()
+        device = te_device_type()
         if isinstance(inp, Float8Tensor):
             dtype = inp.dtype
             device = inp.device

@@ -37,14 +37,7 @@ _ops_to_preserve_subclass_in_fsdp2 = {
 }
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class Float8Quantizer(Quantizer):
@@ -118,7 +111,7 @@ class Float8Quantizer(Quantizer):
 
         # Canonicalize tensor attributes
         if device is None:
-            device = torch.device(_te_device_type())
+            device = torch.device(te_device_type())
 
         # Allocate FP8 data
         data = torch.empty(shape, dtype=torch.uint8, device=device)
@@ -304,7 +297,7 @@ class Float8CurrentScalingQuantizer(Quantizer):
 
         # Canonicalize tensor attributes
         if device is None:
-            device = torch.device(_te_device_type())
+            device = torch.device(te_device_type())
 
         # Allocate FP8 data
         data = torch.empty(shape, dtype=torch.uint8, device=device)
@@ -692,7 +685,7 @@ class Float8Tensor(Float8TensorStorage, QuantizedTensor):
         """
 
         # Tensor device
-        new_device = tensor.device if tensor.device.type == _te_device_type() else self.device
+        new_device = tensor.device if tensor.device.type == te_device_type() else self.device
         if not devices_match(new_device, tensor.device):
             tensor = tensor.to(device=new_device)
 

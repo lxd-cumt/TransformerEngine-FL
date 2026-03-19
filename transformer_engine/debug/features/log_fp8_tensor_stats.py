@@ -24,18 +24,9 @@ from transformer_engine.pytorch.tensor.mxfp8_tensor import MXFP8Quantizer
 from transformer_engine.pytorch.tensor.float8_blockwise_tensor import Float8BlockQuantizer
 from transformer_engine.debug.features.utils import get_reduction_params, next_enabled_iter
 
+from transformer_engine import te_device_type
 
 ALL_RECIPE_NAMES = ["fp8_delayed_scaling", "fp8_current_scaling", "mxfp8", "fp8_block_scaling"]
-
-
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
 
 
 def _get_recipe_name(quantizer: Optional[Quantizer]):
@@ -58,7 +49,7 @@ def _get_new_quantizer(recipe_name, fp8_dtype):
     if recipe_name == "fp8_current_scaling":
         return Float8CurrentScalingQuantizer(
             fp8_dtype=fp8_dtype,
-            device=torch.device(_te_device_type()),
+            device=torch.device(te_device_type()),
             rowwise=True,
             columnwise=True,
         )

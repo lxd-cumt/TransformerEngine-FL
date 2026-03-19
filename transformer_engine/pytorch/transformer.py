@@ -43,14 +43,7 @@ warnings.filterwarnings("module", category=DeprecationWarning, module="transform
 __all__ = ["TransformerLayer"]
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class DropPath(torch.nn.Module):
@@ -321,7 +314,7 @@ class TransformerLayer(torch.nn.Module):
         bias: bool = True,
         activation: str = "gelu",
         normalization: str = "LayerNorm",
-        device: Union[torch.device, str] = _te_device_type(),
+        device: Union[torch.device, str] = te_device_type(),
         attn_input_format: str = "sbhd",
         name: str = None,
         qk_norm_type: Optional[str] = None,

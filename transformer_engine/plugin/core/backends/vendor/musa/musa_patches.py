@@ -41,12 +41,14 @@ def apply_patch() -> None:
         return
 
     # Mark TE global device type for Python-side callers.
+    # IMPORTANT: do not import `transformer_engine` here, because TE's `__init__.py`
+    # imports this module to run patches and that would cause a circular import.
     try:
         import transformer_engine
-
         transformer_engine.TE_DEVICE_TYPE = "musa"
         transformer_engine.TE_PLATFORM = torch.musa
-    except Exception:
+    except Exception as e:
+        print(f"[TE-FL Musa Patches] Error setting TE device type or platform: {e}")
         # Best-effort: don't fail patching if we can't set the global.
         pass
 

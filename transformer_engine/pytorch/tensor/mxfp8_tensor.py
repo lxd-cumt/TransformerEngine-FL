@@ -26,14 +26,7 @@ from .quantized_tensor import (
 aten = torch.ops.aten
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class MXFP8Quantizer(Quantizer):
@@ -106,7 +99,7 @@ class MXFP8Quantizer(Quantizer):
 
         # Canonicalize tensor attributes
         if device is None:
-            device = torch.device(_te_device_type())
+            device = torch.device(te_device_type())
 
         assert (
             shape[-1] % MXFP8_BLOCK_SCALING_SIZE == 0
@@ -413,7 +406,7 @@ class MXFP8Tensor(MXFP8TensorStorage, QuantizedTensor):
         """
 
         # Tensor device
-        new_device = tensor.device if tensor.device.type == _te_device_type() else self.device
+        new_device = tensor.device if tensor.device.type == te_device_type() else self.device
         if not devices_match(new_device, tensor.device):
             tensor = tensor.to(device=new_device)
 

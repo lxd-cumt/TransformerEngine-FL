@@ -23,14 +23,7 @@ __all__ = [
 ]
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 def validate_gemm_scale(scale: Optional[float], required: bool) -> float:
@@ -199,7 +192,7 @@ def general_grouped_gemm(
     sm_count = get_sm_count()
     if grad and use_bias:
         grad_bias = [
-            torch.empty(B[i].shape[1], dtype=out[0].dtype, device=_te_device_type())
+            torch.empty(B[i].shape[1], dtype=out[0].dtype, device=te_device_type())
             for i in range(num_gemms)
         ]
     else:

@@ -141,14 +141,7 @@ else:
 _dpa_fp8_cs_o_in_f16 = os.getenv("NVTE_DPA_FP8CS_O_in_F16", "1") == "1"
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 class FP8EmulationFunc(torch.autograd.Function):
@@ -397,10 +390,10 @@ class UnfusedDotProductAttention(torch.nn.Module):
                 fp8_recipe = fp8_meta["local_recipes"][0]
             if fp8_recipe.float8_current_scaling():
                 S_quantizer = Float8CurrentScalingQuantizer(
-                    fp8_dtype=S_quantizer.dtype, device=_te_device_type()
+                    fp8_dtype=S_quantizer.dtype, device=te_device_type()
                 )
                 dP_quantizer = Float8CurrentScalingQuantizer(
-                    fp8_dtype=dP_quantizer.dtype, device=_te_device_type()
+                    fp8_dtype=dP_quantizer.dtype, device=te_device_type()
                 )
 
             if "2" in qkv_layout or "3" in qkv_layout:
@@ -686,10 +679,10 @@ class FlashAttention(torch.nn.Module):
             for x in [query_layer, key_layer, value_layer]
         ), "FlashAttention only supports FP16 and BF16 data types, or Float8Tensors."
         assert (
-            query_layer.device.type == _te_device_type()
-            and key_layer.device.type == _te_device_type()
-            and value_layer.device.type == _te_device_type()
-        ), f"FlashAttention currently only supports {_te_device_type()} tensors."
+            query_layer.device.type == te_device_type()
+            and key_layer.device.type == te_device_type()
+            and value_layer.device.type == te_device_type()
+        ), f"FlashAttention currently only supports {te_device_type()} tensors."
         assert (
             qkv_layout in QKVLayouts
         ), f"FlashAttention does not support qkv_layout = {qkv_layout}!"
@@ -1750,10 +1743,10 @@ class FusedAttention(torch.nn.Module):
             for x in [query_layer, key_layer, value_layer]
         ), "FusedAttention only supports FP16 and BF16 data types, or Float8Tensors."
         assert (
-            query_layer.device.type == _te_device_type()
-            and key_layer.device.type == _te_device_type()
-            and value_layer.device.type == _te_device_type()
-        ), f"FusedAttention only supports {_te_device_type()} tensors."
+            query_layer.device.type == te_device_type()
+            and key_layer.device.type == te_device_type()
+            and value_layer.device.type == te_device_type()
+        ), f"FusedAttention only supports {te_device_type()} tensors."
         assert (
             qkv_layout in QKVLayouts
         ), f"FusedAttention does not support qkv_layout = {qkv_layout}!"

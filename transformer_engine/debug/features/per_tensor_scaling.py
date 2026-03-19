@@ -21,14 +21,7 @@ from transformer_engine.pytorch.tensor.float8_tensor import (
 from transformer_engine.debug.features.api import TEConfigAPIMapper
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 def per_tensor_cast(
@@ -44,8 +37,8 @@ def per_tensor_cast(
         torch.bfloat16,
     ), "[NVTORCH INSPECT ERROR] Unsupported tensor type for per tensor current scaling"
     assert (
-        tensor.device.type == _te_device_type()
-    ), f"[NVTORCH INSPECT ERROR] Must be a {_te_device_type()} tensor."
+        tensor.device.type == te_device_type()
+    ), f"[NVTORCH INSPECT ERROR] Must be a {te_device_type()} tensor."
     assert fp8_dtype in {
         tex.DType.kFloat8E4M3,
         tex.DType.kFloat8E5M2,

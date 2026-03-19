@@ -18,14 +18,7 @@ from ..op import BasicOperation, OperationContext
 from .._common import maybe_dequantize
 
 
-def _te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
+from transformer_engine import te_device_type
 
 
 __all__ = [
@@ -103,7 +96,7 @@ class _ActivationOperation(BasicOperation, metaclass=abc.ABCMeta):
         # Compute dtype
         dtype: torch.dtype
         if torch.is_autocast_enabled():
-            dtype = torch.get_autocast_dtype(_te_device_type())
+            dtype = torch.get_autocast_dtype(te_device_type())
         else:
             dtype = input_.dtype
         if dtype not in (torch.float32, torch.float16, torch.bfloat16):
