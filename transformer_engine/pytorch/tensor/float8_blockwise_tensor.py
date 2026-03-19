@@ -9,10 +9,10 @@ from typing import Optional, Tuple, Iterable, Union
 import math
 import torch
 import transformer_engine_torch as tex
-from transformer_engine import te_device_type
 from transformer_engine_torch import DType as TE_DType
 from transformer_engine_torch import Float8BlockScaleTensorFormat
 
+from transformer_engine import te_device_type
 from transformer_engine.common.recipe import Float8BlockScaling, Recipe
 from .storage.float8_blockwise_tensor_storage import Float8BlockwiseQTensorStorage
 from .quantized_tensor import (
