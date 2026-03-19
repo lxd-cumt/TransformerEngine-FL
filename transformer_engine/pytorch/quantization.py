@@ -16,6 +16,7 @@ from typing import Callable, List, Optional, Dict, Any, Tuple, Union
 
 import torch
 import transformer_engine_torch as tex
+from transformer_engine import te_device_type
 from transformer_engine.common.recipe import (
     Recipe,
     DelayedScaling,
@@ -26,6 +27,7 @@ from transformer_engine.common.recipe import (
     NVFP4BlockScaling,
     CustomRecipe,
 )
+
 
 from .constants import dist_group_type
 from .utils import get_device_compute_capability
@@ -41,9 +43,6 @@ __all__ = [
     "is_nvfp4_available",
     "get_default_recipe",
 ]
-
-
-from transformer_engine import te_device_type
 
 
 @functools.lru_cache(maxsize=None)

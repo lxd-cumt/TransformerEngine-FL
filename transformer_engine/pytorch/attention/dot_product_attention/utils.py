@@ -21,6 +21,7 @@ import torch.distributed as dist
 import torch.nn.functional as F
 import transformer_engine_torch as tex
 import transformer_engine as te
+from transformer_engine import te_device_type
 from transformer_engine.pytorch.cpp_extensions.fused_attn import (
     QKVLayout,
     AttnBiasType,
@@ -64,9 +65,6 @@ _print_layer = int(os.getenv("NVTE_PRINT_LAYER_NUMBER", "1"))
 _print_rank = int(os.getenv("NVTE_PRINT_RANK", "0"))
 
 _cu_seqlens_cache = {}
-
-
-from transformer_engine import te_device_type
 
 
 class AttentionLogging:

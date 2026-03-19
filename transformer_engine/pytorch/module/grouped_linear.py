@@ -11,7 +11,10 @@ import torch
 
 import transformer_engine_torch as tex
 
+from transformer_engine import te_device_type
 from transformer_engine.common.recipe import Recipe
+
+
 from .base import (
     get_multi_stream_cublas_workspace,
     TransformerEngineBaseModule,
@@ -51,9 +54,6 @@ from ..tensor.quantized_tensor import (
 )
 
 __all__ = ["GroupedLinear"]
-
-
-from transformer_engine import te_device_type
 
 
 class _GroupedLinear(torch.autograd.Function):

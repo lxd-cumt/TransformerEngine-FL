@@ -10,6 +10,8 @@ from typing import Any, Optional
 
 import torch
 
+from transformer_engine import te_device_type
+
 from ...cpu_offload import is_cpu_offload_enabled, mark_activation_offload
 from ...quantization import FP8GlobalStateManager
 from ...tensor import Quantizer
@@ -19,9 +21,6 @@ from ..op import (
     FusibleOperation,
     OperationContext,
 )
-
-
-from transformer_engine import te_device_type
 
 
 class ForwardLinearScaleAdd(FusedOperation):

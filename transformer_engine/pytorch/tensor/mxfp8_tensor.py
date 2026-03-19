@@ -12,6 +12,7 @@ import torch
 import transformer_engine_torch as tex
 from transformer_engine_torch import DType as TE_DType
 
+from transformer_engine import te_device_type
 from transformer_engine.common.recipe import MXFP8BlockScaling, Recipe
 from ..constants import MXFP8_BLOCK_SCALING_SIZE
 from ..utils import devices_match, round_up_to_nearest_multiple
@@ -24,9 +25,6 @@ from .quantized_tensor import (
 )
 
 aten = torch.ops.aten
-
-
-from transformer_engine import te_device_type
 
 
 class MXFP8Quantizer(Quantizer):

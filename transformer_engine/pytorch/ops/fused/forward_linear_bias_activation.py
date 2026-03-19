@@ -10,14 +10,13 @@ from typing import Any, Optional
 
 import torch
 
+from transformer_engine import te_device_type
+
 from ...cpu_offload import is_cpu_offload_enabled, mark_activation_offload
 from ...quantization import FP8GlobalStateManager
 from ...tensor import Quantizer
 from ..basic import BasicLinear, Bias
 from ..op import FusedOperation, FusibleOperation, OperationContext
-
-
-from transformer_engine import te_device_type
 
 
 class ForwardLinearBiasActivation(FusedOperation):

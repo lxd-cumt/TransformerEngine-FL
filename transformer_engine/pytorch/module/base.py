@@ -19,7 +19,9 @@ import torch
 import torch.nn.functional as F
 
 import transformer_engine_torch as tex
+from transformer_engine import te_device_type, te_platform
 from transformer_engine.common.recipe import Recipe
+
 
 from ._common import _ParameterInitMeta, noop_cat
 from ..quantization import (
@@ -63,9 +65,6 @@ _ub_communicators = None
 _NUM_MAX_UB_STREAMS = 3
 _MIN_STREAM_PRIORITY, _MAX_STREAM_PRIORITY = None, None
 layers_atomic_ring_exchange = []
-
-
-from transformer_engine import te_device_type, te_platform
 
 
 class UserBufferQuantizationMode(Enum):

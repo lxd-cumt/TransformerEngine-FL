@@ -11,14 +11,14 @@ from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
 import numpy as np
 import torch
 
+from transformer_engine import te_device_type
+
 from . import torch_version
 from .tensor.quantized_tensor import Quantizer
 from ..debug.pytorch.debug_quantization import DebugQuantizedTensor
 
 
 __all__ = ["get_device_compute_capability", "get_cudnn_version", "is_bf16_available"]
-
-from transformer_engine import te_device_type
 
 
 def requires_grad(*tensors: Tuple[Optional[torch.Tensor], ...]) -> None:

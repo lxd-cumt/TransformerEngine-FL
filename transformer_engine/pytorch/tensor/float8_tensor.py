@@ -11,6 +11,7 @@ import torch
 import transformer_engine_torch as tex
 from transformer_engine_torch import DType as TE_DType
 
+from transformer_engine import te_device_type
 from transformer_engine.common.recipe import DelayedScaling, Float8CurrentScaling, Recipe
 from ..utils import canonicalize_process_group, devices_match
 from .storage.float8_tensor_storage import Float8TensorStorage, _FromFloat8Func
@@ -35,9 +36,6 @@ _ops_to_preserve_subclass_in_fsdp2 = {
     torch.ops.aten.split.Tensor,
     torch.ops.aten.clone.default,
 }
-
-
-from transformer_engine import te_device_type
 
 
 class Float8Quantizer(Quantizer):

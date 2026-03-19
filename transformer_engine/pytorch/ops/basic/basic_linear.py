@@ -12,6 +12,8 @@ from typing import Any, Optional
 
 import torch
 
+from transformer_engine import te_device_type
+
 from ...cpp_extensions import general_gemm
 from ...cpu_offload import is_cpu_offload_enabled, mark_activation_offload
 from ...distributed import (
@@ -44,9 +46,6 @@ def _wait_async(handle: Optional[Any]) -> None:
     """Wait for asynchronous communication to finish, if needed"""
     if handle is not None:
         handle.wait()
-
-
-from transformer_engine import te_device_type
 
 
 class BasicLinear(BasicOperation):

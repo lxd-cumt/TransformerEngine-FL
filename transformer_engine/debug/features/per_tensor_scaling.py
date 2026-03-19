@@ -11,7 +11,9 @@ import torch
 import nvdlfw_inspect.api as debug_api
 from nvdlfw_inspect.registry import Registry, api_method
 
+
 import transformer_engine_torch as tex
+from transformer_engine import te_device_type
 from transformer_engine.pytorch.tensor import Quantizer
 from transformer_engine.pytorch.tensor.float8_tensor import (
     Float8Tensor,
@@ -19,9 +21,6 @@ from transformer_engine.pytorch.tensor.float8_tensor import (
     Float8CurrentScalingQuantizer,
 )
 from transformer_engine.debug.features.api import TEConfigAPIMapper
-
-
-from transformer_engine import te_device_type
 
 
 def per_tensor_cast(

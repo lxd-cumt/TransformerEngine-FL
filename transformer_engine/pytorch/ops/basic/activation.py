@@ -11,14 +11,14 @@ from typing import Optional
 import torch
 
 import transformer_engine_torch as tex
+
+from transformer_engine import te_device_type
+
 from ...cpu_offload import is_cpu_offload_enabled, mark_activation_offload
 from ...tensor.float8_tensor import Float8CurrentScalingQuantizer, Quantizer
 from ...utils import clear_tensor_data
 from ..op import BasicOperation, OperationContext
 from .._common import maybe_dequantize
-
-
-from transformer_engine import te_device_type
 
 
 __all__ = [

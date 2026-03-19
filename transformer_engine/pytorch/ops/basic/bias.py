@@ -10,12 +10,12 @@ from typing import Optional
 import torch
 
 import transformer_engine_torch as tex
+
+from transformer_engine import te_device_type
+
 from ..op import BasicOperation, OperationContext
 from ...utils import canonicalize_device, canonicalize_dtype
 from ...tensor import Quantizer
-
-
-from transformer_engine import te_device_type
 
 
 class Bias(BasicOperation):

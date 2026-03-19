@@ -10,6 +10,7 @@ from typing import Any, Optional
 
 import torch
 
+from transformer_engine import te_device_type
 from transformer_engine_torch import CommOverlapType
 from ...cpp_extensions import general_gemm
 from ...cpu_offload import is_cpu_offload_enabled, mark_activation_offload
@@ -31,9 +32,6 @@ from ..op import (
     FusibleOperation,
     OperationContext,
 )
-
-
-from transformer_engine import te_device_type
 
 
 class UserbuffersForwardLinear(FusedOperation):

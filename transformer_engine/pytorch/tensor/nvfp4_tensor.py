@@ -13,6 +13,7 @@ import torch
 import transformer_engine_torch as tex
 from transformer_engine_torch import DType as TE_DType
 
+from transformer_engine import te_device_type
 from transformer_engine.common.recipe import NVFP4BlockScaling, Recipe
 from ..constants import NVFP4_BLOCK_SCALING_SIZE, dist_group_type
 from ..utils import (
@@ -25,9 +26,6 @@ from .storage.nvfp4_tensor_storage import NVFP4TensorStorage, _FromNVFP4Func
 from .quantized_tensor import QuantizedTensor, Quantizer, _IdentityFunc
 
 aten = torch.ops.aten
-
-
-from transformer_engine import te_device_type
 
 
 def get_no_random_sign_vector() -> torch.Tensor:

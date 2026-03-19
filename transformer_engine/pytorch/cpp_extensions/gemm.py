@@ -8,6 +8,9 @@ from typing import Iterable, Optional, Tuple, Union, List
 import os
 import torch
 import transformer_engine_torch as tex
+
+from transformer_engine import te_device_type
+
 from ..constants import TE_DType
 from ..utils import get_sm_count, _empty_tensor
 
@@ -21,9 +24,6 @@ __all__ = [
     "general_gemm",
     "general_grouped_gemm",
 ]
-
-
-from transformer_engine import te_device_type
 
 
 def validate_gemm_scale(scale: Optional[float], required: bool) -> float:

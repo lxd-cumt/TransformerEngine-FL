@@ -8,6 +8,7 @@ import collections
 from typing import Callable, List, Optional, Tuple, Union
 import torch
 
+from transformer_engine import te_device_type
 from transformer_engine.debug.pytorch.debug_state import TEDebugState
 from transformer_engine.pytorch.quantization import FP8GlobalStateManager
 from transformer_engine.pytorch.tensor.float8_tensor import Float8Tensor
@@ -39,9 +40,6 @@ from transformer_engine.pytorch.attention.rope import apply_rotary_pos_emb
 _dpa_fp8_recipe = os.getenv("NVTE_DPA_FP8_RECIPE", "")
 _dpa_fp8_recipe_dpa = os.getenv("NVTE_DPA_FP8_RECIPE_DPA", "0") == "1"
 _dpa_fp8_recipe_mha = os.getenv("NVTE_DPA_FP8_RECIPE_MHA", "0") == "1"
-
-
-from transformer_engine import te_device_type
 
 
 class MultiheadAttention(torch.nn.Module):

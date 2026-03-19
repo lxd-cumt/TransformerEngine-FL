@@ -9,6 +9,7 @@ from typing import Optional, Tuple, Iterable, Union
 import math
 import torch
 import transformer_engine_torch as tex
+from transformer_engine import te_device_type
 from transformer_engine_torch import DType as TE_DType
 from transformer_engine_torch import Float8BlockScaleTensorFormat
 
@@ -22,9 +23,6 @@ from .quantized_tensor import (
 from ..utils import devices_match, round_up_to_nearest_multiple
 
 aten = torch.ops.aten
-
-
-from transformer_engine import te_device_type
 
 
 class Float8BlockQuantizer(Quantizer):

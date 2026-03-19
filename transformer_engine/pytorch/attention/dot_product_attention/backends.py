@@ -15,6 +15,7 @@ from packaging.version import Version as PkgVersion
 import torch
 import torch.nn.functional as F
 import transformer_engine_torch as tex
+from transformer_engine import te_device_type
 from transformer_engine.pytorch.utils import (
     get_device_compute_capability,
     split_tensor_along_dim,
@@ -139,9 +140,6 @@ else:
 
 # Float8CurrentScaling: fused_attn_bwd takes O in FP8 by default, this flag allows it in F16
 _dpa_fp8_cs_o_in_f16 = os.getenv("NVTE_DPA_FP8CS_O_in_F16", "1") == "1"
-
-
-from transformer_engine import te_device_type
 
 
 class FP8EmulationFunc(torch.autograd.Function):

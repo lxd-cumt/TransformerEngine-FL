@@ -11,12 +11,10 @@ from einops import rearrange
 import torch
 
 import transformer_engine_torch as tex
+from transformer_engine import te_device_type
 from transformer_engine.pytorch.cpp_extensions.fused_attn import QKVFormat
 
 __all__ = ["InferenceParams", "KVCacheManager", "NonPagedKVCacheManager", "PagedKVCacheManager"]
-
-
-from transformer_engine import te_device_type
 
 
 class KVCacheManager:

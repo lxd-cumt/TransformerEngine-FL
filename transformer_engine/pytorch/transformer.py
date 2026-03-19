@@ -10,6 +10,7 @@ from typing import Callable, List, Optional, Tuple, Union
 
 import torch
 
+from transformer_engine import te_device_type
 from transformer_engine.pytorch import torch_version
 from transformer_engine.pytorch.module import LayerNormMLP, LayerNorm, RMSNorm
 from transformer_engine.debug.pytorch.debug_state import TEDebugState
@@ -41,9 +42,6 @@ warnings.filterwarnings("module", category=DeprecationWarning, module="transform
 
 
 __all__ = ["TransformerLayer"]
-
-
-from transformer_engine import te_device_type
 
 
 class DropPath(torch.nn.Module):

@@ -9,13 +9,11 @@ from typing import Optional, Tuple, Union, List
 import torch
 
 import transformer_engine_torch as tex
+from transformer_engine import te_device_type
 from transformer_engine.pytorch.cpp_extensions.fused_attn import QKVFormat
 
 
 __all__ = ["RotaryPositionEmbedding", "apply_rotary_pos_emb", "apply_fused_qkv_rotary_pos_emb"]
-
-
-from transformer_engine import te_device_type
 
 
 class RotaryPositionEmbedding(torch.nn.Module):

@@ -29,6 +29,8 @@ except ImportError:
 
 import transformer_engine_torch as tex
 
+from transformer_engine import te_device_type
+
 from . import torch_version
 from .utils import (
     is_non_tn_fp8_gemm_supported,
@@ -66,9 +68,6 @@ _FP8_ACTIVATION_RECOMPUTE_PHASE = False
 
 
 _ALL_ACTIVE_RNG_STATES = {}
-
-
-from transformer_engine import te_device_type
 
 
 def get_all_rng_states() -> bool:

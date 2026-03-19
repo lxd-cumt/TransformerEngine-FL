@@ -11,6 +11,9 @@ import warnings
 import torch
 
 from transformer_engine_torch import CommOverlapType, bulk_overlap_ag_with_external_gemm
+
+from transformer_engine import te_device_type
+
 from ...cpp_extensions import general_gemm
 from ...distributed import get_distributed_world_size
 from ...module.base import (
@@ -27,9 +30,6 @@ from ...utils import canonicalize_device, canonicalize_dtype, clear_tensor_data
 from ..basic import BasicLinear, Bias, ReduceScatter
 from .._common import maybe_dequantize, is_quantized_tensor
 from ..op import FusedOperation, FusibleOperation, OperationContext
-
-
-from transformer_engine import te_device_type
 
 
 class UserbuffersBackwardLinear(FusedOperation):

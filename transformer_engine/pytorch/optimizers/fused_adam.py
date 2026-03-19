@@ -12,10 +12,9 @@ import warnings
 
 import torch
 import transformer_engine_torch as tex
+from transformer_engine import te_device_type
 from transformer_engine.pytorch.tensor.float8_tensor import Float8Tensor, Float8Quantizer
 from .multi_tensor_apply import multi_tensor_applier
-
-from transformer_engine import te_device_type
 
 
 def get_fp8_meta(fp8_tensor):

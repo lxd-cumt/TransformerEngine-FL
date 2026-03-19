@@ -9,6 +9,7 @@ import warnings
 from packaging.version import Version as PkgVersion
 
 import torch
+from transformer_engine import te_device_type
 from transformer_engine.pytorch.utils import (
     get_device_compute_capability,
 )
@@ -34,16 +35,6 @@ import transformer_engine.pytorch.attention.dot_product_attention.utils as dpa_u
 from transformer_engine.plugin.core.ops import FlashAttentionBase
 
 import flag_gems
-
-
-def te_device_type(default="cuda"):
-    try:
-        import transformer_engine as te
-
-        device_type = getattr(te, "TE_DEVICE_TYPE", "cuda")
-        return device_type
-    except Exception:
-        return default
 
 
 class AttnFuncFL(torch.autograd.Function):

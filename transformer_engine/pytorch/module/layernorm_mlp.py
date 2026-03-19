@@ -15,9 +15,12 @@ from torch.nn import init
 
 import transformer_engine_torch as tex
 
+from transformer_engine import te_device_type
 from transformer_engine.common.recipe import Recipe
 from transformer_engine.pytorch import torch_version
 from transformer_engine.pytorch.tensor.utils import is_experimental
+
+
 from .base import (
     fill_userbuffers_buffer_for_all_gather,
     get_workspace,
@@ -83,9 +86,6 @@ from ..export import is_in_onnx_export_mode, assert_warmed_up
 from ...debug.pytorch.debug_state import TEDebugState
 
 __all__ = ["LayerNormMLP"]
-
-
-from transformer_engine import te_device_type
 
 
 def _get_act_func_supported_list(recipe: Optional[Recipe] = None):

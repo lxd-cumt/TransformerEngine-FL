@@ -14,6 +14,7 @@ import torch
 from torch.nn.parameter import Parameter
 
 import transformer_engine_torch as tex
+from transformer_engine import te_device_type
 from transformer_engine.common.recipe import (
     Format,
     Recipe,
@@ -161,9 +162,6 @@ _dpa_fp8ds_reduce_amax = os.getenv("NVTE_DPA_FP8DS_REDUCE_AMAX", "1") == "1"
 
 
 __all__ = ["DotProductAttention"]
-
-
-from transformer_engine import te_device_type
 
 
 class DotProductAttention(TransformerEngineBaseModule):
