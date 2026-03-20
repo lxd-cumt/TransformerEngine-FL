@@ -132,6 +132,14 @@ def register_builtins(registry) -> None:
             vendor=None,
             priority=150,
         ),
+        OpImpl(
+            op_name="get_cudnn_version",
+            impl_id="default.flagos",
+            kind=BackendImplKind.DEFAULT,
+            fn=_bind_is_available(backend.get_cudnn_version, is_avail),
+            vendor=None,
+            priority=150,
+        ),
     ]
 
     registry.register_many(impls)
