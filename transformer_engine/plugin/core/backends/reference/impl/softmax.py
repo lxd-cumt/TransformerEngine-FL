@@ -44,20 +44,35 @@ def scaled_masked_softmax_forward_torch(
     mask: torch.Tensor,
     scale: float,
 ) -> torch.Tensor:
-    # Handle uint8 mask (CUDA format: 1=masked, 0=unmasked)
-    # Convert to additive mask (-10000 for masked positions, 0 for unmasked)
-    if mask.dtype == torch.uint8:
-        additive_mask = torch.zeros_like(input, dtype=input.dtype)
-        # Expand mask if needed (mask shape: batch, 1, seq_q, seq_k)
-        if mask.dim() == 4 and mask.size(1) == 1 and input.dim() == 4:
-            mask = mask.expand_as(input)
-        additive_mask = additive_mask.masked_fill(mask.bool(), -10000.0)
-    else:
-        additive_mask = mask
+    """Reference forward matching TE CUDA `scaled_masked_softmax_warp_forward`.
 
-    scaled_input = input * scale + additive_mask
+    Integer/bool mask (same as uint8 kernel contract):
+      - **Exactly** ``mask == 1`` means **masked** (logit set to ``-10000``, not ``input*scale`` offset).
+      - Any other value (typically 0) means **unmasked** (logit is ``input * scale``).
 
-    return F.softmax(scaled_input, dim=-1)
+    Floating mask: treated as **additive** bias in logit space (already scaled), added after
+    ``input * scale``.
+
+    Common pitfalls this avoids vs the old implementation:
+    1) ``input * scale + (-10000)`` on masked positions ≠ CUDA's plain ``-10000``.
+    2) Non-uint8 masks (bool, int) were used as direct addends → wrong (0/1 added to logits).
+    3) ``mask.bool()`` masks any nonzero byte; CUDA only masks when ``mask == 1``.
+    """
+    if mask.dim() == 4 and mask.size(1) == 1 and input.dim() == 4:
+        mask = mask.expand_as(input)
+
+    scaled = input * scale
+
+    if mask.is_floating_point():
+        scaled = scaled + mask.to(dtype=scaled.dtype)
+        return F.softmax(scaled, dim=-1)
+
+    # Integer / bool: align with CUDA (masked iff value == 1)
+    scaled = scaled.masked_fill(mask == 1, -10000.0)
+    # CUDA zeros output row when every position in the softmax dim is masked (max == -10000)
+    all_masked = (mask == 1).all(dim=-1, keepdim=True)
+    out = F.softmax(scaled, dim=-1)
+    return out.masked_fill(all_masked, 0.0)
 
 
 def scaled_masked_softmax_backward_torch(
