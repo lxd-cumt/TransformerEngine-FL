@@ -18,7 +18,7 @@ TE_PLATFORM = torch.cuda
 
 # Apply MUSA (VENDOR) Patches, such as torch.cuda.device -> torch.musa.device
 try:
-    from .plugin.core.backends.vendor.musa.musa_patches import apply_patch as _musa_apply_patch
+    from .plugin.core.backends.vendor.musa.patches import apply_patch as _musa_apply_patch
 
     _musa_apply_patch()
     print("[TE-FL] MUSA patches applied")
