@@ -4,7 +4,6 @@ import flag_gems
 
 
 def scaled_masked_softmax_forward_fl(
-    self,
     input: torch.Tensor,
     mask: torch.Tensor,
     scale_factor: Union[float, torch.Tensor],
@@ -38,7 +37,6 @@ def scaled_masked_softmax_forward_fl(
 
 
 def scaled_masked_softmax_backward_fl(
-    self,
     output_grad_: torch.Tensor,
     softmax_results_: torch.Tensor,
     scale_factor: float,
