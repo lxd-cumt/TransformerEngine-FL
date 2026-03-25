@@ -133,6 +133,22 @@ def register_builtins(registry) -> None:
             priority=150,
         ),
         OpImpl(
+            op_name="scaled_masked_softmax_forward",
+            impl_id="default.flagos",
+            kind=BackendImplKind.DEFAULT,
+            fn=_bind_is_available(backend.scaled_masked_softmax_forward, is_avail),
+            vendor=None,
+            priority=150,
+        ),
+        OpImpl(
+            op_name="scaled_masked_softmax_backward",
+            impl_id="default.flagos",
+            kind=BackendImplKind.DEFAULT,
+            fn=_bind_is_available(backend.scaled_masked_softmax_backward, is_avail),
+            vendor=None,
+            priority=150,
+        ),
+        OpImpl(
             op_name="get_cudnn_version",
             impl_id="default.flagos",
             kind=BackendImplKind.DEFAULT,
