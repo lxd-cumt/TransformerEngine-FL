@@ -130,8 +130,7 @@ class MetaxBackend(TEFLBackendBase):
             if quantizer is not None and hasattr(quantizer, "dtype") and hasattr(tex, "DType"):
                 qdtype = quantizer.dtype
                 if qdtype is not None:
-                    if qdtype.__class__ is not tex.DType:
-                        quantizer.dtype = tex.DType(int(qdtype))
+                    quantizer.dtype = tex.DType(int(qdtype))
         except Exception:
             pass
         return tex.quantize(tensor, quantizer, output, noop)
