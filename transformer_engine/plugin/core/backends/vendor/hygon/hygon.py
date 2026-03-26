@@ -54,7 +54,6 @@ def _load_hygon_libs():
         spec.loader.exec_module(solib)
         return True
     except Exception as e:
-        print(f"[HYGON] Failed to load hygon libs: {e}")
         return False
 
 
@@ -65,6 +64,8 @@ def _ensure_hygon_libs():
     global _hygon_libs_loaded
     if not _hygon_libs_loaded:
         _hygon_libs_loaded = _load_hygon_libs()
+    if _hygon_libs_loaded:
+        print(f"[HYGON] Successfully loaded HYGON libs")
     return _hygon_libs_loaded
 
 

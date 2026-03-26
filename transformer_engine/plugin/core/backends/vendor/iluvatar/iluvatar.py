@@ -77,7 +77,6 @@ def _load_iluvatar_libs():
                     return True
         return False
     except Exception as e:
-        print(f"[ILUVATAR] Failed to load ILUVATAR libs: {e}")
         return False
 
 
@@ -88,6 +87,8 @@ def _ensure_iluvatar_libs():
     global _iluvatar_libs_loaded
     if not _iluvatar_libs_loaded:
         _iluvatar_libs_loaded = _load_iluvatar_libs()
+    if _iluvatar_libs_loaded:
+        print(f"[ILUVATAR] Successfully loaded ILUVATAR libs")
     return _iluvatar_libs_loaded
 
 

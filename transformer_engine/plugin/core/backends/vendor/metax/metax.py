@@ -37,7 +37,6 @@ def _load_metax_libs():
                     return True
         return False
     except Exception as e:
-        print(f"[Metax] Failed to load Metax libs: {e}")
         return False
 
 
@@ -48,6 +47,8 @@ def _ensure_metax_libs():
     global _metax_libs_loaded
     if not _metax_libs_loaded:
         _metax_libs_loaded = _load_metax_libs()
+    if _metax_libs_loaded:
+        print(f"[Metax] Successfully loaded Metax libs")
     return _metax_libs_loaded
 
 
