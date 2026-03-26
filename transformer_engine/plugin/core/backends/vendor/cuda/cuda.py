@@ -166,6 +166,17 @@ class CUDABackend(TEFLBackendBase):
         noop: Optional[torch.Tensor] = None,
     ) -> Any:
         tex = self._get_tex()
+        # Quantizer.dtype may originate from a different TE extension module
+        # (e.g. transformer_engine_torch vs transformer_engine_torch_nv) which leads
+        # to a pybind enum cast failure. Normalize it to this backend's `tex.DType`.
+        try:
+            if quantizer is not None and hasattr(quantizer, "dtype") and hasattr(tex, "DType"):
+                qdtype = quantizer.dtype
+                if qdtype is not None:
+                    quantizer.dtype = tex.DType(int(qdtype))
+        except Exception:
+            pass
+
         return tex.quantize(tensor, quantizer, output, noop)
 
     def dequantize(
