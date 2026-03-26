@@ -87,8 +87,8 @@ def _ensure_iluvatar_libs():
     global _iluvatar_libs_loaded
     if not _iluvatar_libs_loaded:
         _iluvatar_libs_loaded = _load_iluvatar_libs()
-    if _iluvatar_libs_loaded:
-        print(f"[ILUVATAR] Successfully loaded ILUVATAR libs")
+        if _iluvatar_libs_loaded:
+            print(f"[ILUVATAR] Successfully loaded ILUVATAR libs")
     return _iluvatar_libs_loaded
 
 

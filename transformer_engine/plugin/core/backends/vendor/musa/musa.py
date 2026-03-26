@@ -76,8 +76,8 @@ def _ensure_musa_libs():
     global _musa_libs_loaded
     if not _musa_libs_loaded:
         _musa_libs_loaded = _load_musa_libs()
-    if _musa_libs_loaded:
-        print(f"[MUSA] Successfully loaded MUSA libs")
+        if _musa_libs_loaded:
+            print(f"[MUSA] Successfully loaded MUSA libs")
     return _musa_libs_loaded
 
 
