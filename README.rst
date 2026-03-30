@@ -10,9 +10,7 @@
 
 The following table summarizes the specific adaptation status of multiple chips to the three backends of TransformerEngine-FL (FlagOS Triton, Vendor, and Reference Torch).
 
-**TE-FL Backends**
-
-.. list-table:: TE-FL backend support by vendor
+.. list-table::
    :header-rows: 1
    :widths: 28 18 20 18
    :align: left
