@@ -7,6 +7,28 @@
 
 
 **TransformerEngine-FL is a fork of TransformerEngine that introduces a plugin-based architecture for supporting diverse AI chips, built on top of** `FlagOS <https://github.com/flagos-ai>`_, **a unified open-source AI system software stack.**
+The following table summarizes the specific adaptation status of multiple chips to the three backends of TransformerEngine-FL (FlagOS Triton, Vendor, and Reference Torch).
+
++----------------------+-------------------+-------------------+-------------------+
+| Vendor               | FlagOS (Triton)   | Reference (Torch) | Vendor            |
++======================+===================+===================+===================+
+| NVIDIA GPU           |        ✅         |        ✅          |        ✅         |
++----------------------+-------------------+-------------------+-------------------+
+| Metax                |        ✅         |        ✅          |        ✅         |
++----------------------+-------------------+-------------------+-------------------+
+| Moore Threads (MUSA) |        ✅         |        ✅          |        ✅         |
++----------------------+-------------------+-------------------+-------------------+
+| Hygon                |        ✅         |        ✅          |        ✅         |
++----------------------+-------------------+-------------------+-------------------+
+| Iluvatar             |        ✅         |        ✅          |        ✅         |
++----------------------+-------------------+-------------------+-------------------+
+| Kunlunxin            |        ✅         |        ✅          |                   |
++----------------------+-------------------+-------------------+-------------------+
+| Cambricon            |        ✅         |        ✅          |                   |
++----------------------+-------------------+-------------------+-------------------+
+| Tsingmicro (TXDA)    |        ✅         |        ✅          |                   |
++----------------------+-------------------+-------------------+-------------------+
+
 
 Transformer Engine
 ==================
