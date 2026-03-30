@@ -10,6 +10,7 @@ import flag_gems
 
 __all__ = [
     "generic_gemm_fl",
+    "te_general_grouped_gemm_fl",
 ]
 
 _DTYPE_TO_TORCH = {
@@ -115,3 +116,107 @@ def generic_gemm_fl(
         return D, bias_grad, gelu_input, extra_output_ret
     else:
         return out1, bias_grad, gelu_input, extra_output_ret
+
+
+# This function can represent both forward and backward computations.
+# When grad is False (forward computation), the 'bias' is bias;
+# When grad is True (backward computation/gradient calculation), the 'bias' is grad_bias;
+def te_general_grouped_gemm_fl(
+    B: List[torch.Tensor],
+    transb: bool,
+    A: List[torch.Tensor],
+    transa: bool,
+    D: Optional[List[torch.Tensor]],
+    D_type: Any,
+    m_splits: List[int],
+    bias: List[torch.Tensor],  # bias or grad_bias
+    bias_type: Any,
+    single_output: bool,
+    pre_gelu_out: List[torch.Tensor],
+    grad: bool,
+    workspace: List[torch.Tensor],
+    workspaceSize: int,
+    accumulate: bool,
+    use_split_accumulator: bool,
+    math_sm_count: int,
+) -> Optional[List[torch.Tensor]]:
+    if single_output and D is None:
+        raise ValueError("not implemented, D should be allocated for single output case.")
+
+    num_gemms = len(A)
+    if D is None:
+        D = []
+        for i in range(num_gemms):
+            m = A[i].shape[1] if transa else A[i].shape[0]
+            n = B[i].shape[0] if transb else B[i].shape[1]
+            D.append(torch.empty((m, n), dtype=D[i].dtype, device=A[0].device))
+
+    temp_D = []
+    for i in range(num_gemms):
+        # Handle the special case of zero-element inputs
+        if A[i].numel() == 0 or B[i].numel() == 0:
+            if not single_output:
+                if D[i].numel() != 0 and not accumulate:
+                    flag_gems.copy_(D[i], flag_gems.zeros(D[i].shape))
+            else:
+                out = flag_gems.zeros((A[i].shape[0], B[i].shape[1]))
+            if grad and len(bias) > i and bias[i] is not None and bias[i].numel() != 0:
+                flag_gems.copy_(bias[i], flag_gems.zeros(bias[i].shape))
+            if (
+                len(pre_gelu_out) > i
+                and pre_gelu_out[i] is not None
+                and pre_gelu_out[i].numel() != 0
+            ):
+                flag_gems.copy_(pre_gelu_out[i], flag_gems.zeros(pre_gelu_out[i].shape))
+            continue
+
+        a = A[i].t() if transa else A[i]
+        b = B[i].t() if transb else B[i]
+        # Determine presence of epilogue tensors
+        has_bias = len(bias) > i and bias[i] is not None and bias[i].numel() > 0
+        has_pre_gelu = (
+            len(pre_gelu_out) > i and pre_gelu_out[i] is not None and pre_gelu_out[i].numel() > 0
+        )
+
+        # Forward Pass calculation
+        if not grad:
+            if has_bias:
+                # Fused matrix multiplication and bias addition
+                out = flag_gems.addmm(bias[i], a, b)
+            else:
+                out = flag_gems.mm(a, b)
+
+            # Apply GELU epilogue if pre_gelu_out is provided
+            if has_pre_gelu:
+                flag_gems.copy_(pre_gelu_out[i], out)
+                out = flag_gems.gelu(out)
+        else:
+            out = flag_gems.mm(a, b)
+
+            # Apply dGELU epilogue if requested
+            if has_pre_gelu:
+                out = flag_gems.gelu_backward(out, pre_gelu_out[i])
+
+            # Compute bias gradients if requested
+            if has_bias:
+                bias_grad = flag_gems.sum_dim(out, dim=[0])
+                if accumulate:
+                    flag_gems.add_(bias[i], bias_grad)
+                else:
+                    flag_gems.copy_(bias[i], bias_grad)
+
+        if not single_output:
+            # Store output
+            if accumulate:
+                flag_gems.add_(D[i], out.to(D[i].dtype))
+            else:
+                flag_gems.copy_(D[i], out.to(D[i].dtype))
+        else:
+            temp_D.append(out.to(D[0].dtype))
+
+    if single_output:
+        if temp_D:
+            temp = flag_gems.cat(temp_D, dim=0)
+            flag_gems.copy_(D[0], temp)
+
+    return bias
