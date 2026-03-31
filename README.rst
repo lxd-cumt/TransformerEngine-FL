@@ -40,11 +40,11 @@ The following table summarizes the specific adaptation status of multiple chips 
      - ✅
      - ✅
    * - Kunlunxin
-     - ✅
+     -
      - ✅
      - —
    * - Cambricon
-     - ✅
+     -
      - ✅
      - —
    * - Tsingmicro (TXDA)
