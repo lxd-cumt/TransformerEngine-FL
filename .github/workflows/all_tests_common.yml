@@ -92,13 +92,13 @@ jobs:
     uses: ./.github/workflows/unit_tests_common.yml
     name: unit_tests
     with:
-      setup_commands: ${{ inputs.setup_commands }}
       platform: ${{ inputs.platform }}
       device: ${{ matrix.device }}
       image: ${{ needs.checkout_and_config.outputs.ci_image }}
       runs_on: ${{ needs.checkout_and_config.outputs.runs_on }}
       container_volumes: ${{ needs.checkout_and_config.outputs.container_volumes }}
       container_options: ${{ needs.checkout_and_config.outputs.container_options }}
+      setup_commands: ${{ inputs.setup_commands }}
       ignored_tests: ${{ needs.checkout_and_config.outputs.ignored_tests }}
       build_env: ${{ needs.checkout_and_config.outputs.build_env }}
 
