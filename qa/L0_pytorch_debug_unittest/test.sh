@@ -1,8 +1,20 @@
-# Copyright (c) 2022-2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Copyright (c) 2022-2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # See LICENSE for license information.
 
+function error_exit() {
+    echo "Error: $1"
+    exit 1
+}
 
+function test_fail() {
+    RET=1
+    FAILED_CASES="$FAILED_CASES $1"
+    echo "Error: sub-test failed: $1"
+}
+
+RET=0
+FAILED_CASES=""
 
 : ${TE_PATH:=/opt/transformerengine}
 : ${NVTE_TEST_NVINSPECT_FEATURE_DIRS:=$TE_PATH/transformer_engine/debug/features}
@@ -18,13 +30,12 @@ FAIL=0
 
 # It is not installed as a requirement,
 # because it is not available on PyPI.
-pip install pytest==8.2.1
+pip install pytest==8.2.1 || error_exit "Failed to install pytest"
 
 run_test_step() {
     local xml_file=$1
     local test_path=$2
     local cmd=$3
-
 
     if [ "$PLATFORM" = "metax" ]; then
         case "$test_path" in
@@ -40,7 +51,7 @@ run_test_step() {
 
     echo "-------------------------------------------------------"
     echo "[RUN] Executing: $test_path"
-    eval "$cmd" || FAIL=1
+    eval "$cmd" || test_fail "$test_path"
 }
 
 
@@ -71,7 +82,7 @@ run_test_step "test_perf.xml" "$TE_PATH/tests/pytorch/debug/test_perf.py" \
 
 
 
-
+# standard sanity and numerics tests with initialized debug
 # Step 7: Sanity 2
 run_test_step "test_sanity_2.xml" "$TE_PATH/tests/pytorch/test_sanity.py" \
 "NVTE_TEST_NVINSPECT_ENABLED=1 NVTE_TEST_NVINSPECT_CONFIG_FILE=$NVTE_TEST_NVINSPECT_DUMMY_CONFIG_FILE NVTE_TEST_NVINSPECT_FEATURE_DIRS=$NVTE_TEST_NVINSPECT_FEATURE_DIRS PYTORCH_JIT=0 NVTE_TORCH_COMPILE=0 NVTE_ALLOW_NONDETERMINISTIC_ALGO=0 \
@@ -82,4 +93,9 @@ run_test_step "test_numerics_2.xml" "$TE_PATH/tests/pytorch/test_numerics.py" \
 "NVTE_TEST_NVINSPECT_ENABLED=1 NVTE_TEST_NVINSPECT_CONFIG_FILE=$NVTE_TEST_NVINSPECT_DUMMY_CONFIG_FILE NVTE_TEST_NVINSPECT_FEATURE_DIRS=$NVTE_TEST_NVINSPECT_FEATURE_DIRS PYTORCH_JIT=0 NVTE_TORCH_COMPILE=0 NVTE_ALLOW_NONDETERMINISTIC_ALGO=0 NVTE_FUSED_ATTN=0 \
 pytest -v -s --junitxml=$XML_LOG_DIR/test_numerics_2.xml $TE_PATH/tests/pytorch/test_numerics.py -k \"not (test_linear_accuracy or test_layernorm_linear_accuracy or test_layernorm_mlp_accuracy or test_grouped_linear_accuracy or test_transformer_layer_hidden_states_format or test_grouped_gemm)\" --no-header"
 
-exit $FAIL
+if [ "$RET" -ne 0 ]; then
+    echo "Error in the following test cases:$FAILED_CASES"
+    exit 1
+fi
+echo "All tests passed"
+exit 0
