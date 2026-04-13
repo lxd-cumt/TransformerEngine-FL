@@ -253,6 +253,7 @@ class FlashAttentionBase(torch.nn.Module, ABC):
         inference_params: Optional[Any] = None,
         flash_attention_backend: Optional[Any] = None,
         fp8_output: bool = False,
+        num_splits: Optional[int] = 1,
     ) -> torch.Tensor:
         """
         Actual forward implementation - subclasses must implement this.
@@ -285,6 +286,7 @@ class FlashAttentionBase(torch.nn.Module, ABC):
         inference_params: Optional[Any] = None,
         flash_attention_backend: Optional[Any] = None,
         fp8_output: bool = False,
+        num_splits: Optional[int] = 1,
     ) -> torch.Tensor:
         """
         Forward pass with automatic fallback support and caching.
@@ -314,6 +316,7 @@ class FlashAttentionBase(torch.nn.Module, ABC):
                 inference_params=inference_params,
                 flash_attention_backend=flash_attention_backend,
                 fp8_output=fp8_output,
+                num_splits=num_splits,
             )
 
         def call_impl_fn(impl_class):
@@ -341,6 +344,7 @@ class FlashAttentionBase(torch.nn.Module, ABC):
                     inference_params=inference_params,
                     flash_attention_backend=flash_attention_backend,
                     fp8_output=fp8_output,
+                    num_splits=num_splits,
                 )
             else:
                 fallback_instance = impl_class(**self._init_params)
@@ -369,6 +373,7 @@ class FlashAttentionBase(torch.nn.Module, ABC):
                     inference_params=inference_params,
                     flash_attention_backend=flash_attention_backend,
                     fp8_output=fp8_output,
+                    num_splits=num_splits,
                 )
 
         return self._manager.call_with_custom_impl(
@@ -999,6 +1004,8 @@ class TEFLBackendBase(ABC):
         window_size_left: int,
         window_size_right: int,
         return_max_logit: bool,
+        cuda_graph: bool = False,
+        deterministic: bool = False,
     ) -> NVTE_Fused_Attn_Backend:
         raise NotImplementedError
 

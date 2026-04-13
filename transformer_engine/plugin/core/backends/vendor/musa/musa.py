@@ -742,6 +742,8 @@ class MUSABackend(TEFLBackendBase):
         window_size_left: int,
         window_size_right: int,
         return_max_logit: bool,
+        cuda_graph: bool = False,
+        deterministic: bool = False,
     ) -> NVTE_Fused_Attn_Backend:
         tex = self._get_tex()
 
@@ -774,6 +776,8 @@ class MUSABackend(TEFLBackendBase):
             window_size_left,
             window_size_right,
             return_max_logit,
+            cuda_graph,
+            deterministic,
         )
         return NVTE_Fused_Attn_Backend(result)
 
