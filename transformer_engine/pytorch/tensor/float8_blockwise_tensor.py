@@ -220,7 +220,7 @@ class Float8BlockQuantizer(Quantizer):
             device = torch.device(te_device_type())
 
         tensor_kwargs = {
-            "device": torch.device("cuda") if device is None else device,
+            "device": torch.device(te_device_type()) if device is None else device,
             "pin_memory": pin_memory,
         }
 

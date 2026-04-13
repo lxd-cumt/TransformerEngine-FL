@@ -13,6 +13,7 @@ from typing import Any, Optional
 
 import torch
 
+from transformer_engine import te_device_type
 import transformer_engine_torch as tex
 from ...quantization import Recipe
 from ...tensor import Quantizer
@@ -157,7 +158,7 @@ class ForwardGroupedMLP_CuTeGEMMSwiGLU_MXFP8(FusedOperation):
         fc2_weight_param = fc2_op.weight if fc2_op.single_grouped_weight else fc2_op.weight0
         device = fc1_weight_param.device
         if torch.is_autocast_enabled():
-            dtype = torch.get_autocast_dtype("cuda")
+            dtype = torch.get_autocast_dtype(te_device_type())
         else:
             dtype = fc1_weight_param.dtype
 

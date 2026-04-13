@@ -18,6 +18,7 @@ from .float8_tensor_storage import Float8TensorStorage
 from .mxfp8_tensor_storage import MXFP8TensorStorage
 from .float8_blockwise_tensor_storage import Float8BlockwiseQTensorStorage
 from .nvfp4_tensor_storage import NVFP4TensorStorage
+from transformer_engine import te_device_type
 
 
 class GroupedTensorStorage:
@@ -563,7 +564,7 @@ class GroupedTensorStorage:
             # TODO(ksivaman): Single kernel + remove the host offset calculation.
             tensor_offsets = GroupedTensorStorage.make_tensor_offsets(first_dims, logical_last_dim)
             if (
-                first_dims.device.type == "cuda"
+                first_dims.device.type == te_device_type()
                 and torch.cuda.is_available()
                 and torch.cuda.is_current_stream_capturing()
             ):
