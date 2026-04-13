@@ -208,6 +208,42 @@ class IluvatarBackend(TEFLBackendBase):
 
         return tex.bgrad_quantize(input, quantizer)
 
+    def group_quantize(
+        self,
+        input: torch.Tensor,
+        quantizer: Any,
+    ) -> List[Any]:
+        tex = self._get_tex()
+
+        # Normalize quantizer.dtype to this backend's `tex.DType`.
+        try:
+            if quantizer is not None and hasattr(quantizer, "dtype") and hasattr(tex, "DType"):
+                qdtype = quantizer.dtype
+                if qdtype is not None:
+                    quantizer.dtype = tex.DType(int(qdtype))
+        except Exception:
+            pass
+
+        return tex.group_quantize(input, quantizer)
+
+    def bgrad_group_quantize(
+        self,
+        input: torch.Tensor,
+        quantizer: Any,
+    ) -> List[Any]:
+        tex = self._get_tex()
+
+        # Normalize quantizer.dtype to this backend's `tex.DType`.
+        try:
+            if quantizer is not None and hasattr(quantizer, "dtype") and hasattr(tex, "DType"):
+                qdtype = quantizer.dtype
+                if qdtype is not None:
+                    quantizer.dtype = tex.DType(int(qdtype))
+        except Exception:
+            pass
+
+        return tex.bgrad_group_quantize(input, quantizer)
+
     def generic_gemm(
         self,
         A: Any,
@@ -264,6 +300,10 @@ class IluvatarBackend(TEFLBackendBase):
         )
 
     # GELU and variants #
+    def glu(self, input: torch.Tensor, quantizer: Any) -> Any:
+        tex = self._get_tex()
+        return tex.glu(input, quantizer)
+
     def gelu(self, input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
         return tex.gelu(input, quantizer)
@@ -317,6 +357,10 @@ class IluvatarBackend(TEFLBackendBase):
         return tex.clamped_swiglu(input, quantizer, limit, alpha)
 
     # Backward of GELU and variants #
+    def dglu(self, grad: torch.Tensor, fwd_input: torch.Tensor, quantizer: Any) -> Any:
+        tex = self._get_tex()
+        return tex.dglu(grad, fwd_input, quantizer)
+
     def dgelu(self, grad: torch.Tensor, fwd_input: torch.Tensor, quantizer: Any) -> Any:
         tex = self._get_tex()
         return tex.dgelu(grad, fwd_input, quantizer)
@@ -610,9 +654,10 @@ class IluvatarBackend(TEFLBackendBase):
         tensor: torch.Tensor,
         split_sections: List[int],
         quantizer_list: List[Any],
+        disable_bulk_allocation: bool = False,
     ) -> List[Any]:
         tex = self._get_tex()
-        return tex.split_quantize(tensor, split_sections, quantizer_list)
+        return tex.split_quantize(tensor, split_sections, quantizer_list, disable_bulk_allocation)
 
     def te_general_grouped_gemm(
         self,
@@ -657,6 +702,18 @@ class IluvatarBackend(TEFLBackendBase):
             math_sm_count,
         )
 
+    def te_general_grouped_gemm_for_grouped_tensor(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.te_general_grouped_gemm_for_grouped_tensor(*args, **kwargs)
+
+    def te_general_grouped_gemm_for_discrete_in(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.te_general_grouped_gemm_for_discrete_in(*args, **kwargs)
+
+    def te_general_grouped_gemm_for_discrete_out(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.te_general_grouped_gemm_for_discrete_out(*args, **kwargs)
+
     def fp8_transpose(
         self,
         input: torch.Tensor,
@@ -674,6 +731,30 @@ class IluvatarBackend(TEFLBackendBase):
     ) -> torch.Tensor:
         tex = self._get_tex()
         return tex.swap_first_dims(tensor, out)
+
+    def nvfp4_data_transpose(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.nvfp4_data_transpose(*args, **kwargs)
+
+    def swizzle_scales_for_gemm_(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.swizzle_scales_for_gemm_(*args, **kwargs)
+
+    def grouped_swizzle_for_gemm(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.grouped_swizzle_for_gemm(*args, **kwargs)
+
+    def convert_host_pointers_to_tensor(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.convert_host_pointers_to_tensor(*args, **kwargs)
+
+    def get_device_pointer_for_data_and_scales(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.get_device_pointer_for_data_and_scales(*args, **kwargs)
+
+    def splits_to_offsets(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.splits_to_offsets(*args, **kwargs)
 
     def get_fused_attn_backend(
         self,
@@ -782,6 +863,54 @@ class IluvatarBackend(TEFLBackendBase):
         return tex.fp8_block_scaling_partial_cast(
             inp, out, scale, h, w, start_offset, block_len, out_dtype
         )
+
+    def mxfp8_scaling_compute_partial_amax(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.mxfp8_scaling_compute_partial_amax(*args, **kwargs)
+
+    def mxfp8_scaling_partial_cast(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.mxfp8_scaling_partial_cast(*args, **kwargs)
+
+    def nvfp4_2d_compute_partial_amax(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.nvfp4_2d_compute_partial_amax(*args, **kwargs)
+
+    def nvfp4_multi_tensor_compute_partial_amax(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.nvfp4_multi_tensor_compute_partial_amax(*args, **kwargs)
+
+    def nvfp4_compute_global_scale(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.nvfp4_compute_global_scale(*args, **kwargs)
+
+    def nvfp4_compute_per_block_scale(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.nvfp4_compute_per_block_scale(*args, **kwargs)
+
+    def nvfp4_expand_scale_to_fp8(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.nvfp4_expand_scale_to_fp8(*args, **kwargs)
+
+    def nvfp4_fused_scale(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.nvfp4_fused_scale(*args, **kwargs)
+
+    def nvfp4_multi_tensor_fused_scale(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.nvfp4_multi_tensor_fused_scale(*args, **kwargs)
+
+    def nvfp4_2d_partial_cast(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.nvfp4_2d_partial_cast(*args, **kwargs)
+
+    def nvfp4_multi_tensor_2d_partial_cast(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.nvfp4_multi_tensor_2d_partial_cast(*args, **kwargs)
+
+    def nvfp4_2d_multi_tensor_transpose(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.nvfp4_2d_multi_tensor_transpose(*args, **kwargs)
 
     def fused_multi_row_padding(
         self,
@@ -1369,6 +1498,10 @@ class IluvatarBackend(TEFLBackendBase):
         tex = self._get_tex()
         return tex.multi_tensor_scale(chunk_size, noop_flag, tensor_lists, scale)
 
+    def multi_tensor_scale_tensor(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.multi_tensor_scale_tensor(*args, **kwargs)
+
     def multi_tensor_l2norm(
         self,
         chunk_size: int,
@@ -1586,6 +1719,10 @@ class IluvatarBackend(TEFLBackendBase):
         return tex.multi_tensor_compute_scale_and_scale_inv(
             chunk_size, noop_flag, tensor_lists, max_fp8, force_pow_2_scales, epsilon
         )
+
+    def multi_tensor_compute_scale_inv_e8m0(self, *args, **kwargs):
+        tex = self._get_tex()
+        return tex.multi_tensor_compute_scale_inv_e8m0(*args, **kwargs)
 
     # Comm+GEMM Overlap
     def bulk_overlap_ag_with_external_gemm(

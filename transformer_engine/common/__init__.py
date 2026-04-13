@@ -401,7 +401,6 @@ def _load_core_library():
 if "NVTE_PROJECT_BUILDING" not in os.environ or bool(int(os.getenv("NVTE_RELEASE_BUILD", "0"))):
     sanity_checks_for_pypi_installation()
 
-
     # Skip loading CUDA libraries if CUDA build was skipped (FL-only mode)
     if not skip_cuda_build():
         _CUDNN_LIB_CTYPES = _load_cudnn()

@@ -442,6 +442,14 @@ class TEFLBackendBase(ABC):
     ) -> List[Any]:
         raise NotImplementedError
 
+    # GLU #
+    def glu(
+        self,
+        input: torch.Tensor,
+        quantizer: Any,
+    ) -> Any:
+        raise NotImplementedError
+
     # GELU and variants #
     def gelu(
         self,
@@ -521,6 +529,15 @@ class TEFLBackendBase(ABC):
         quantizer: Any,
         limit: float = 7.0,
         alpha: float = 1.702,
+    ) -> Any:
+        raise NotImplementedError
+
+    # Backward of GLU #
+    def dglu(
+        self,
+        grad: torch.Tensor,
+        fwd_input: torch.Tensor,
+        quantizer: Any,
     ) -> Any:
         raise NotImplementedError
 
@@ -834,11 +851,30 @@ class TEFLBackendBase(ABC):
     ) -> List[Any]:
         raise NotImplementedError
 
+    def group_quantize(
+        self,
+        tensor: torch.Tensor,
+        quantizer: Any,
+        num_tensors: int,
+        first_dims: List[int],
+    ) -> Any:
+        raise NotImplementedError
+
+    def bgrad_group_quantize(
+        self,
+        tensor: torch.Tensor,
+        quantizer: Any,
+        num_tensors: int,
+        first_dims: List[int],
+    ) -> Any:
+        raise NotImplementedError
+
     def split_quantize(
         self,
         tensor: torch.Tensor,
         split_sections: List[int],
         quantizer_list: List[Any],
+        disable_bulk_allocation: bool = False,
     ) -> List[Any]:
         raise NotImplementedError
 
@@ -864,6 +900,27 @@ class TEFLBackendBase(ABC):
     ) -> Optional[List[torch.Tensor]]:
         raise NotImplementedError
 
+    def te_general_grouped_gemm_for_grouped_tensor(
+        self,
+        *args,
+        **kwargs,
+    ) -> Optional[List[torch.Tensor]]:
+        raise NotImplementedError
+
+    def te_general_grouped_gemm_for_discrete_in(
+        self,
+        *args,
+        **kwargs,
+    ) -> Optional[List[torch.Tensor]]:
+        raise NotImplementedError
+
+    def te_general_grouped_gemm_for_discrete_out(
+        self,
+        *args,
+        **kwargs,
+    ) -> Optional[List[torch.Tensor]]:
+        raise NotImplementedError
+
     def fp8_transpose(
         self,
         input: torch.Tensor,
@@ -876,6 +933,50 @@ class TEFLBackendBase(ABC):
         self,
         tensor: torch.Tensor,
         out: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        raise NotImplementedError
+
+    def nvfp4_data_transpose(
+        self,
+        input: torch.Tensor,
+        out: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        raise NotImplementedError
+
+    def swizzle_scales_for_gemm_(
+        self,
+        tensor: torch.Tensor,
+    ) -> None:
+        raise NotImplementedError
+
+    def grouped_swizzle_for_gemm(
+        self,
+        tensor: Any,
+        rowwise: bool,
+        columnwise: bool,
+    ) -> None:
+        raise NotImplementedError
+
+    def convert_host_pointers_to_tensor(
+        self,
+        tensor_lists: List[List[torch.Tensor]],
+    ) -> Any:
+        raise NotImplementedError
+
+    def get_device_pointer_for_data_and_scales(
+        self,
+        data_tensors: List[torch.Tensor],
+        scale_tensors: List[torch.Tensor],
+        swizzle: bool = False,
+        rowwise: bool = True,
+        data_dtype: Any = None,
+    ) -> Any:
+        raise NotImplementedError
+
+    def splits_to_offsets(
+        self,
+        first_dims: List[int],
+        logical_last_dim: int,
     ) -> torch.Tensor:
         raise NotImplementedError
 
@@ -940,6 +1041,129 @@ class TEFLBackendBase(ABC):
         start_offset: int,
         block_len: int,
         out_dtype: DType,
+    ) -> None:
+        raise NotImplementedError
+
+    # MXFP8 scaling
+    def mxfp8_scaling_compute_partial_amax(
+        self,
+        tensor: torch.Tensor,
+        amax: torch.Tensor,
+        h: int,
+        w: int,
+        start_offset: int,
+        block_len: int,
+    ) -> None:
+        raise NotImplementedError
+
+    def mxfp8_scaling_partial_cast(
+        self,
+        inp: torch.Tensor,
+        out: torch.Tensor,
+        scale: torch.Tensor,
+        h: int,
+        w: int,
+        start_offset: int,
+        block_len: int,
+        out_dtype: DType,
+    ) -> None:
+        raise NotImplementedError
+
+    # NVFP4 2D
+    def nvfp4_2d_compute_partial_amax(
+        self,
+        tensor: torch.Tensor,
+        amax: torch.Tensor,
+        h: int,
+        w: int,
+        start_offset: int,
+        block_len: int = 16,
+    ) -> None:
+        raise NotImplementedError
+
+    def nvfp4_multi_tensor_compute_partial_amax(
+        self,
+        master_weight_list: List[torch.Tensor],
+        partial_amax_list: List[torch.Tensor],
+        global_amax_list: List[torch.Tensor],
+        h_list: List[int],
+        w_list: List[int],
+        start_offset_list: List[int],
+        block_len: int = 16,
+    ) -> None:
+        raise NotImplementedError
+
+    def nvfp4_compute_global_scale(
+        self,
+        global_amaxes: torch.Tensor,
+        global_scale_tensor: torch.Tensor,
+    ) -> None:
+        raise NotImplementedError
+
+    def nvfp4_compute_per_block_scale(
+        self,
+        *args,
+        **kwargs,
+    ) -> None:
+        raise NotImplementedError
+
+    def nvfp4_expand_scale_to_fp8(
+        self,
+        *args,
+        **kwargs,
+    ) -> None:
+        raise NotImplementedError
+
+    def nvfp4_fused_scale(
+        self,
+        *args,
+        **kwargs,
+    ) -> None:
+        raise NotImplementedError
+
+    def nvfp4_multi_tensor_fused_scale(
+        self,
+        block_amax_list: List[torch.Tensor],
+        global_amax_list: List[torch.Tensor],
+        per_block_scale_list: List[torch.Tensor],
+        target_scale_list: List[torch.Tensor],
+        target_amax_list: List[torch.Tensor],
+        tile_rows_list: List[int],
+        tile_cols_list: List[int],
+        rows_padded_list: List[int],
+        block_len: int,
+    ) -> None:
+        raise NotImplementedError
+
+    def nvfp4_2d_partial_cast(
+        self,
+        inp: torch.Tensor,
+        out: torch.Tensor,
+        scale: torch.Tensor,
+        global_scale: torch.Tensor,
+        h: int,
+        w: int,
+        start_offset: int,
+        block_len: int = 16,
+    ) -> None:
+        raise NotImplementedError
+
+    def nvfp4_multi_tensor_2d_partial_cast(
+        self,
+        inp_list: List[torch.Tensor],
+        *args,
+        **kwargs,
+    ) -> None:
+        raise NotImplementedError
+
+    def nvfp4_2d_multi_tensor_transpose(
+        self,
+        rowwise_data_list: List[torch.Tensor],
+        columnwise_data_list: List[torch.Tensor],
+        rowwise_scale_inv_list: List[torch.Tensor],
+        columnwise_scale_inv_list: List[torch.Tensor],
+        M_list: List[int],
+        K_list: List[int],
     ) -> None:
         raise NotImplementedError
 
@@ -1329,6 +1553,15 @@ class TEFLBackendBase(ABC):
     ) -> None:
         raise NotImplementedError
 
+    def multi_tensor_scale_tensor(
+        self,
+        chunk_size: int,
+        noop_flag: torch.Tensor,
+        tensor_lists: List[List[torch.Tensor]],
+        scale: torch.Tensor,
+    ) -> None:
+        raise NotImplementedError
+
     def multi_tensor_l2norm(
         self,
         chunk_size: int,
@@ -1455,6 +1688,15 @@ class TEFLBackendBase(ABC):
         max_fp8: float,
         force_pow_2_scales: bool,
         epsilon: float,
+    ) -> None:
+        raise NotImplementedError
+
+    def multi_tensor_compute_scale_inv_e8m0(
+        self,
+        chunk_size: int,
+        noop_flag: torch.Tensor,
+        tensor_lists: List[List[torch.Tensor]],
+        block_len: int,
     ) -> None:
         raise NotImplementedError
 

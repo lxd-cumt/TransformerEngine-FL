@@ -45,9 +45,13 @@ class _moe_permute_index_map(torch.autograd.Function):
 
         # Device check
         if inp.device.type != te_device_type():
-            raise ValueError(f"inp must be a {te_device_type()} tensor, but got tensor on {inp.device}.")
+            raise ValueError(
+                f"inp must be a {te_device_type()} tensor, but got tensor on {inp.device}."
+            )
         if index.device.type != te_device_type():
-            raise ValueError(f"index must be a {te_device_type()} tensor, but got tensor on {index.device}.")
+            raise ValueError(
+                f"index must be a {te_device_type()} tensor, but got tensor on {index.device}."
+            )
         # Shape check
         if inp.size(0) != index.size(0):
             raise ValueError(
@@ -128,7 +132,9 @@ class _moe_unpermute_index_map(torch.autograd.Function):
         # None probs check
         if probs is not None:
             if probs.device.type != te_device_type():
-                raise ValueError(f"probs must be a {te_device_type()} tensor, but got tensor on {probs.device}.")
+                raise ValueError(
+                    f"probs must be a {te_device_type()} tensor, but got tensor on {probs.device}."
+                )
 
             if probs.dtype != torch.float32:
                 warnings.warn(
@@ -146,10 +152,13 @@ class _moe_unpermute_index_map(torch.autograd.Function):
 
         # Device check
         if inp.device.type != te_device_type():
-            raise ValueError(f"inp must be a {te_device_type()} tensor, but got tensor on {inp.device}.")
+            raise ValueError(
+                f"inp must be a {te_device_type()} tensor, but got tensor on {inp.device}."
+            )
         if row_id_map.device.type != te_device_type():
             raise ValueError(
-                f"row_id_map must be a {te_device_type()} tensor, but got tensor on {row_id_map.device}."
+                f"row_id_map must be a {te_device_type()} tensor, but got tensor on"
+                f" {row_id_map.device}."
             )
 
         # Data type check
@@ -212,18 +221,24 @@ class _moe_permute_mask_map(torch.autograd.Function):
             return inp, torch.tensor([], device=inp.device), torch.tensor([], device=inp.device)
 
         if inp.device.type != te_device_type():
-            raise ValueError(f"inp must be a {te_device_type()} tensor, but got tensor on {inp.device}.")
+            raise ValueError(
+                f"inp must be a {te_device_type()} tensor, but got tensor on {inp.device}."
+            )
         if routing_map.device.type != te_device_type():
             raise ValueError(
-                f"routing_map must be a {te_device_type()} tensor, but got tensor on {routing_map.device}."
+                f"routing_map must be a {te_device_type()} tensor, but got tensor on"
+                f" {routing_map.device}."
             )
         if probs is not None:
             if probs.device.type != te_device_type():
-                raise ValueError(f"probs must be a {te_device_type()} tensor, but got tensor on {probs.device}.")
+                raise ValueError(
+                    f"probs must be a {te_device_type()} tensor, but got tensor on {probs.device}."
+                )
         if pad_offsets is not None:
             if pad_offsets.device.type != te_device_type():
                 raise ValueError(
-                    f"pad_offsets must be a {te_device_type()} tensor, but got tensor on {pad_offsets.device}."
+                    f"pad_offsets must be a {te_device_type()} tensor, but got tensor on"
+                    f" {pad_offsets.device}."
                 )
 
         if inp.size(0) != routing_map.size(0):
@@ -400,21 +415,26 @@ class _moe_unpermute_mask_map(torch.autograd.Function):
         if with_probs:
             if merging_probs.device.type != te_device_type():
                 raise ValueError(
-                    "merging_probs must be a " + te_device_type() + " tensor, but got tensor on "
-                    f"{merging_probs.device}."
+                    "merging_probs must be a "
+                    + te_device_type()
+                    + f" tensor, but got tensor on {merging_probs.device}."
                 )
 
         # Device check
         if inp.device.type != te_device_type():
-            raise ValueError(f"inp must be a {te_device_type()} tensor, but got tensor on {inp.device}.")
+            raise ValueError(
+                f"inp must be a {te_device_type()} tensor, but got tensor on {inp.device}."
+            )
         if row_id_map.device.type != te_device_type():
             raise ValueError(
-                f"row_id_map must be a {te_device_type()} tensor, but got tensor on {row_id_map.device}."
+                f"row_id_map must be a {te_device_type()} tensor, but got tensor on"
+                f" {row_id_map.device}."
             )
         if pad_offsets is not None:
             if pad_offsets.device.type != te_device_type():
                 raise ValueError(
-                    f"pad_offsets must be a {te_device_type()} tensor, but got tensor on {pad_offsets.device}."
+                    f"pad_offsets must be a {te_device_type()} tensor, but got tensor on"
+                    f" {pad_offsets.device}."
                 )
 
         if isinstance(inp, QuantizedTensor):
@@ -780,18 +800,24 @@ class _moe_chunk_sort(torch.autograd.Function):
             return inp, probs
 
         if inp.device.type != te_device_type():
-            raise ValueError(f"inp must be a {te_device_type()} tensor, but got tensor on {inp.device}.")
+            raise ValueError(
+                f"inp must be a {te_device_type()} tensor, but got tensor on {inp.device}."
+            )
         if split_sizes.device.type != te_device_type():
             raise ValueError(
-                f"split_sizes must be a {te_device_type()} tensor, but got tensor on {split_sizes.device}."
+                f"split_sizes must be a {te_device_type()} tensor, but got tensor on"
+                f" {split_sizes.device}."
             )
         if sorted_idxs.device.type != te_device_type():
             raise ValueError(
-                f"sorted_idxs must be a {te_device_type()} tensor, but got tensor on {sorted_idxs.device}."
+                f"sorted_idxs must be a {te_device_type()} tensor, but got tensor on"
+                f" {sorted_idxs.device}."
             )
         if probs is not None:
             if probs.device.type != te_device_type():
-                raise ValueError(f"probs must be a {te_device_type()} tensor, but got tensor on {probs.device}.")
+                raise ValueError(
+                    f"probs must be a {te_device_type()} tensor, but got tensor on {probs.device}."
+                )
 
         num_tokens, hidden_size = inp.shape
         num_splits = split_sizes.size(0)
