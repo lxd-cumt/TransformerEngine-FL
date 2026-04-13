@@ -15,7 +15,7 @@ from transformer_engine.pytorch.utils import (
 )
 from transformer_engine.pytorch.utils import nvtx_range_push, nvtx_range_pop
 
-from transformer_engine.pytorch.tensor.quantized_tensor import (
+from transformer_engine.pytorch.quantized_tensor import (
     prepare_for_saving,
     restore_from_saved,
 )
