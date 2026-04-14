@@ -8,5 +8,25 @@
     "steps_completed": 20,
     "attempts": 1,
     "fallback_errors": 0
+  },
+  {
+    "combo_index": 2,
+    "te_fl_prefer": "vendor",
+    "attention_backend": "fused",
+    "status": "PASSED",
+    "final_loss": "1.230189E+01",
+    "steps_completed": 20,
+    "attempts": 2,
+    "fallback_errors": 0
+  },
+  {
+    "combo_index": 3,
+    "te_fl_prefer": "vendor",
+    "attention_backend": "unfused",
+    "status": "PASSED",
+    "final_loss": "1.669888E+01",
+    "steps_completed": 20,
+    "attempts": 1,
+    "fallback_errors": 0
   }
 ]

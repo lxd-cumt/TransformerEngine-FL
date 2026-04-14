@@ -99,11 +99,11 @@ class AttnFuncFL(torch.autograd.Function):
         ctx.nominal_dtype = out_nominal_dtype
 
         from transformer_engine.pytorch.cpu_offload import (
-            CPUOffloadEnabled,
+            is_cpu_offload_enabled,
             mark_activation_offload,
         )
 
-        if CPUOffloadEnabled:
+        if is_cpu_offload_enabled():
             tensor_list = [q, k, v, out]
 
             mark_activation_offload(*tensor_list)
