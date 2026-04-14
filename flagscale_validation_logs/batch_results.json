@@ -1,0 +1,12 @@
+[
+  {
+    "combo_index": 1,
+    "te_fl_prefer": "vendor",
+    "attention_backend": "flash",
+    "status": "PASSED",
+    "final_loss": "1.202661E+01",
+    "steps_completed": 20,
+    "attempts": 1,
+    "fallback_errors": 0
+  }
+]

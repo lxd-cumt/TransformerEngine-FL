@@ -1220,6 +1220,7 @@ class TEFLBackendBase(ABC):
         attn_mask_type: NVTE_Mask_Type,
         softmax_type: NVTE_Softmax_Type,
         window_size: List[int],
+        bottom_right_diagonal: Optional[bool],
         cu_seqlens_q: torch.Tensor,
         cu_seqlens_kv: torch.Tensor,
         Q: Any,
@@ -1237,6 +1238,7 @@ class TEFLBackendBase(ABC):
         rng_gen: Optional[torch.Generator],
         rng_elts_per_thread: int,
         return_max_logit: bool,
+        cuda_graph: bool = False,
     ) -> List[Any]:
         raise NotImplementedError
 
@@ -1252,6 +1254,7 @@ class TEFLBackendBase(ABC):
         attn_mask_type: NVTE_Mask_Type,
         softmax_type: NVTE_Softmax_Type,
         window_size: List[int],
+        bottom_right_diagonal: Optional[bool],
         deterministic: bool,
         cu_seqlens_q: torch.Tensor,
         cu_seqlens_kv: torch.Tensor,
@@ -1268,6 +1271,7 @@ class TEFLBackendBase(ABC):
         s_quantizer: Any,
         dp_quantizer: Any,
         dqkv_quantizer: Any,
+        cuda_graph: bool = False,
     ) -> List[Any]:
         raise NotImplementedError
 

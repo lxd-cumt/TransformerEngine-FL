@@ -1088,6 +1088,7 @@ class CUDABackend(TEFLBackendBase):
         attn_mask_type: NVTE_Mask_Type,
         softmax_type: NVTE_Softmax_Type,
         window_size: List[int],
+        bottom_right_diagonal: Optional[bool],
         cu_seqlens_q: torch.Tensor,
         cu_seqlens_kv: torch.Tensor,
         Q: Any,
@@ -1105,6 +1106,7 @@ class CUDABackend(TEFLBackendBase):
         rng_gen: Optional[torch.Generator],
         rng_elts_per_thread: int,
         return_max_logit: bool,
+        cuda_graph: bool = False,
     ) -> List[Any]:
         tex = self._get_tex()
 
@@ -1129,6 +1131,7 @@ class CUDABackend(TEFLBackendBase):
             attn_mask_type,
             softmax_type,
             window_size,
+            bottom_right_diagonal,
             cu_seqlens_q,
             cu_seqlens_kv,
             Q,
@@ -1146,6 +1149,7 @@ class CUDABackend(TEFLBackendBase):
             rng_gen,
             rng_elts_per_thread,
             return_max_logit,
+            cuda_graph,
         )
 
     def fused_attn_bwd(
@@ -1160,6 +1164,7 @@ class CUDABackend(TEFLBackendBase):
         attn_mask_type: NVTE_Mask_Type,
         softmax_type: NVTE_Softmax_Type,
         window_size: List[int],
+        bottom_right_diagonal: Optional[bool],
         deterministic: bool,
         cu_seqlens_q: torch.Tensor,
         cu_seqlens_kv: torch.Tensor,
@@ -1176,6 +1181,7 @@ class CUDABackend(TEFLBackendBase):
         s_quantizer: Any,
         dp_quantizer: Any,
         dqkv_quantizer: Any,
+        cuda_graph: bool = False,
     ) -> List[Any]:
         tex = self._get_tex()
 
@@ -1200,6 +1206,7 @@ class CUDABackend(TEFLBackendBase):
             attn_mask_type,
             softmax_type,
             window_size,
+            bottom_right_diagonal,
             deterministic,
             cu_seqlens_q,
             cu_seqlens_kv,
@@ -1216,6 +1223,7 @@ class CUDABackend(TEFLBackendBase):
             s_quantizer,
             dp_quantizer,
             dqkv_quantizer,
+            cuda_graph,
         )
 
     def copy_to_kv_cache(
