@@ -191,6 +191,11 @@ def load_framework_extension(framework: str) -> None:
     # For jax: load the native module as before
     module_name = f"transformer_engine_{framework}"
 
+    # Name of the pip extra dependency for framework extensions from PyPI.
+    extra_dep_name = module_name
+    if framework == "torch":
+        extra_dep_name = "pytorch"
+
     # Skip if already loaded
     if module_name in sys.modules:
         return
