@@ -12,9 +12,9 @@ import os
 from typing import Any, Optional
 
 import torch
+import transformer_engine_torch as tex
 
 from transformer_engine import te_device_type
-import transformer_engine_torch as tex
 from ...quantization import Recipe
 from ...tensor import Quantizer
 from ...utils import get_cached_ones_tensor, get_device_compute_capability, mark_grouped_tensor

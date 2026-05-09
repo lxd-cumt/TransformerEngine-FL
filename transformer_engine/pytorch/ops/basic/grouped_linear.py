@@ -12,9 +12,9 @@ import math
 from typing import Any, Optional
 
 import torch
+import transformer_engine_torch as tex
 
 from transformer_engine import te_device_type
-import transformer_engine_torch as tex
 from ...cpp_extensions import general_grouped_gemm
 from ...distributed import CudaRNGStatesTracker
 from ...module._common import WeightGradStore

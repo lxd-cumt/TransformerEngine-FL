@@ -8,6 +8,8 @@ from typing import Optional, Tuple, List, Union
 import math
 
 import torch
+
+from transformer_engine import te_device_type
 from ...quantized_tensor import QuantizedTensorStorage, Quantizer
 
 from ..mxfp8_tensor import MXFP8Tensor
@@ -18,7 +20,6 @@ from .float8_tensor_storage import Float8TensorStorage
 from .mxfp8_tensor_storage import MXFP8TensorStorage
 from .float8_blockwise_tensor_storage import Float8BlockwiseQTensorStorage
 from .nvfp4_tensor_storage import NVFP4TensorStorage
-from transformer_engine import te_device_type
 
 
 class GroupedTensorStorage:
