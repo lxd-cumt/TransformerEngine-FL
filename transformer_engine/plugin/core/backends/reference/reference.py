@@ -447,6 +447,8 @@ class ReferenceBackend(TEFLBackendBase):
         _window_size_left: int,
         _window_size_right: int,
         _return_max_logit: bool,
+        _cuda_graph: bool = False,
+        _deterministic: bool = False,
     ) -> NVTE_Fused_Attn_Backend:
         return NVTE_Fused_Attn_Backend.NVTE_No_Backend
 
