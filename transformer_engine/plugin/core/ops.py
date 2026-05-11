@@ -1328,6 +1328,7 @@ class TEFLBackendBase(ABC):
         self,
         output_grads: torch.Tensor,
         freqs: torch.Tensor,
+        start_positions: Optional[torch.Tensor],
         qkv_format: NVTE_QKV_Format,
         interleaved: bool,
         cu_seqlens: Optional[torch.Tensor],

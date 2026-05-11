@@ -1155,6 +1155,7 @@ class HygonBackend(TEFLBackendBase):
         self,
         output_grads: torch.Tensor,
         freqs: torch.Tensor,
+        start_positions: Optional[torch.Tensor],
         qkv_format: NVTE_QKV_Format,
         interleaved: bool,
         cu_seqlens: Optional[torch.Tensor],
@@ -1164,7 +1165,14 @@ class HygonBackend(TEFLBackendBase):
         tex = self._get_tex()
         qkv_format = tex.NVTE_QKV_Format(int(qkv_format)) if qkv_format is not None else None
         return tex.fused_rope_backward(
-            output_grads, freqs, qkv_format, interleaved, cu_seqlens, cp_size, cp_rank
+            output_grads,
+            freqs,
+            start_positions,
+            qkv_format,
+            interleaved,
+            cu_seqlens,
+            cp_size,
+            cp_rank,
         )
 
     def fused_qkv_rope_forward(
