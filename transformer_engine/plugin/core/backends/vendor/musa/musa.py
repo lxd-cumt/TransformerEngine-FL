@@ -699,27 +699,52 @@ class MUSABackend(TEFLBackendBase):
         tex = self._get_tex()
         return tex.swap_first_dims(tensor, out)
 
-    def nvfp4_data_transpose(self, *args, **kwargs):
+    def nvfp4_data_transpose(
+        self,
+        input: torch.Tensor,
+        out: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         tex = self._get_tex()
-        return tex.nvfp4_data_transpose(*args, **kwargs)
+        return tex.nvfp4_data_transpose(input, out=out)
 
     def swizzle_scales_for_gemm_(self, tensor: torch.Tensor) -> None:
         tex = self._get_tex()
         return tex.swizzle_scales_for_gemm_(tensor)
 
-    def grouped_swizzle_for_gemm(self, *args, **kwargs):
+    def grouped_swizzle_for_gemm(
+        self,
+        tensor: Any,
+        rowwise: bool,
+        columnwise: bool,
+    ) -> None:
         tex = self._get_tex()
-        return tex.grouped_swizzle_for_gemm(*args, **kwargs)
+        return tex.grouped_swizzle_for_gemm(tensor, rowwise, columnwise)
 
-    def convert_host_pointers_to_tensor(self, *args, **kwargs):
+    def convert_host_pointers_to_tensor(
+        self,
+        tensor_lists: List[List[torch.Tensor]],
+    ) -> Any:
         tex = self._get_tex()
-        return tex.convert_host_pointers_to_tensor(*args, **kwargs)
+        return tex.convert_host_pointers_to_tensor(tensor_lists)
 
-    def get_device_pointer_for_data_and_scales(self, *args, **kwargs):
+    def get_device_pointer_for_data_and_scales(
+        self,
+        data_tensors: List[torch.Tensor],
+        scale_tensors: List[torch.Tensor],
+        swizzle: bool = False,
+        rowwise: bool = True,
+        data_dtype: Any = None,
+    ) -> Any:
         tex = self._get_tex()
-        return tex.get_device_pointer_for_data_and_scales(*args, **kwargs)
+        return tex.get_device_pointer_for_data_and_scales(
+            data_tensors, scale_tensors, swizzle, rowwise, data_dtype
+        )
 
-    def splits_to_offsets(self, first_dims, logical_last_dim):
+    def splits_to_offsets(
+        self,
+        first_dims: List[int],
+        logical_last_dim: int,
+    ) -> torch.Tensor:
         tex = self._get_tex()
         return tex.splits_to_offsets(first_dims, logical_last_dim)
 
@@ -836,11 +861,29 @@ class MUSABackend(TEFLBackendBase):
         )
 
     # MXFP8 scaling
-    def mxfp8_scaling_compute_partial_amax(self, *args, **kwargs):
+    def mxfp8_scaling_compute_partial_amax(
+        self,
+        tensor: torch.Tensor,
+        amax: torch.Tensor,
+        h: int,
+        w: int,
+        start_offset: int,
+        block_len: int,
+    ) -> None:
         tex = self._get_tex()
-        return tex.mxfp8_scaling_compute_partial_amax(*args, **kwargs)
+        return tex.mxfp8_scaling_compute_partial_amax(tensor, amax, h, w, start_offset, block_len)
 
-    def mxfp8_scaling_partial_cast(self, inp, out, scale, h, w, start_offset, block_len, out_dtype):
+    def mxfp8_scaling_partial_cast(
+        self,
+        inp: torch.Tensor,
+        out: torch.Tensor,
+        scale: torch.Tensor,
+        h: int,
+        w: int,
+        start_offset: int,
+        block_len: int,
+        out_dtype: DType,
+    ) -> None:
         tex = self._get_tex()
         out_dtype = tex.DType(int(out_dtype)) if out_dtype is not None else None
         return tex.mxfp8_scaling_partial_cast(
@@ -848,17 +891,46 @@ class MUSABackend(TEFLBackendBase):
         )
 
     # NVFP4 2D
-    def nvfp4_2d_compute_partial_amax(self, *args, **kwargs):
+    def nvfp4_2d_compute_partial_amax(
+        self,
+        tensor: torch.Tensor,
+        amax: torch.Tensor,
+        h: int,
+        w: int,
+        start_offset: int,
+        block_len: int = 16,
+    ) -> None:
         tex = self._get_tex()
-        return tex.nvfp4_2d_compute_partial_amax(*args, **kwargs)
+        return tex.nvfp4_2d_compute_partial_amax(tensor, amax, h, w, start_offset, block_len)
 
-    def nvfp4_multi_tensor_compute_partial_amax(self, *args, **kwargs):
+    def nvfp4_multi_tensor_compute_partial_amax(
+        self,
+        master_weight_list: List[torch.Tensor],
+        partial_amax_list: List[torch.Tensor],
+        global_amax_list: List[torch.Tensor],
+        h_list: List[int],
+        w_list: List[int],
+        start_offset_list: List[int],
+        block_len: int = 16,
+    ) -> None:
         tex = self._get_tex()
-        return tex.nvfp4_multi_tensor_compute_partial_amax(*args, **kwargs)
+        return tex.nvfp4_multi_tensor_compute_partial_amax(
+            master_weight_list,
+            partial_amax_list,
+            global_amax_list,
+            h_list,
+            w_list,
+            start_offset_list,
+            block_len,
+        )
 
-    def nvfp4_compute_global_scale(self, *args, **kwargs):
+    def nvfp4_compute_global_scale(
+        self,
+        global_amaxes: torch.Tensor,
+        global_scale_tensor: torch.Tensor,
+    ) -> None:
         tex = self._get_tex()
-        return tex.nvfp4_compute_global_scale(*args, **kwargs)
+        return tex.nvfp4_compute_global_scale(global_amaxes, global_scale_tensor)
 
     def nvfp4_compute_per_block_scale(self, *args, **kwargs):
         tex = self._get_tex()
@@ -872,21 +944,69 @@ class MUSABackend(TEFLBackendBase):
         tex = self._get_tex()
         return tex.nvfp4_fused_scale(*args, **kwargs)
 
-    def nvfp4_multi_tensor_fused_scale(self, *args, **kwargs):
+    def nvfp4_multi_tensor_fused_scale(
+        self,
+        block_amax_list: List[torch.Tensor],
+        global_amax_list: List[torch.Tensor],
+        per_block_scale_list: List[torch.Tensor],
+        target_scale_list: List[torch.Tensor],
+        target_amax_list: List[torch.Tensor],
+        tile_rows_list: List[int],
+        tile_cols_list: List[int],
+        rows_padded_list: List[int],
+        block_len: int,
+    ) -> None:
         tex = self._get_tex()
-        return tex.nvfp4_multi_tensor_fused_scale(*args, **kwargs)
+        return tex.nvfp4_multi_tensor_fused_scale(
+            block_amax_list,
+            global_amax_list,
+            per_block_scale_list,
+            target_scale_list,
+            target_amax_list,
+            tile_rows_list,
+            tile_cols_list,
+            rows_padded_list,
+            block_len,
+        )
 
-    def nvfp4_2d_partial_cast(self, *args, **kwargs):
+    def nvfp4_2d_partial_cast(
+        self,
+        inp: torch.Tensor,
+        out: torch.Tensor,
+        scale: torch.Tensor,
+        global_scale: torch.Tensor,
+        h: int,
+        w: int,
+        start_offset: int,
+        block_len: int = 16,
+    ) -> None:
         tex = self._get_tex()
-        return tex.nvfp4_2d_partial_cast(*args, **kwargs)
+        return tex.nvfp4_2d_partial_cast(
+            inp, out, scale, global_scale, h, w, start_offset, block_len
+        )
 
     def nvfp4_multi_tensor_2d_partial_cast(self, *args, **kwargs):
         tex = self._get_tex()
         return tex.nvfp4_multi_tensor_2d_partial_cast(*args, **kwargs)
 
-    def nvfp4_2d_multi_tensor_transpose(self, *args, **kwargs):
+    def nvfp4_2d_multi_tensor_transpose(
+        self,
+        rowwise_data_list: List[torch.Tensor],
+        columnwise_data_list: List[torch.Tensor],
+        rowwise_scale_inv_list: List[torch.Tensor],
+        columnwise_scale_inv_list: List[torch.Tensor],
+        M_list: List[int],
+        K_list: List[int],
+    ) -> None:
         tex = self._get_tex()
-        return tex.nvfp4_2d_multi_tensor_transpose(*args, **kwargs)
+        return tex.nvfp4_2d_multi_tensor_transpose(
+            rowwise_data_list,
+            columnwise_data_list,
+            rowwise_scale_inv_list,
+            columnwise_scale_inv_list,
+            M_list,
+            K_list,
+        )
 
     def fused_multi_row_padding(
         self,
