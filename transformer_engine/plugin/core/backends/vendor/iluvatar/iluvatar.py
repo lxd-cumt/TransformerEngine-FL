@@ -1407,6 +1407,7 @@ class IluvatarBackend(TEFLBackendBase):
         routing_map: torch.Tensor,
         intermediate_output: torch.Tensor,
         grad_probs: torch.Tensor,
+        grad_logits: torch.Tensor,
         topk: int,
         use_pre_softmax: bool,
         scaling_factor: Optional[float],
@@ -1419,6 +1420,7 @@ class IluvatarBackend(TEFLBackendBase):
             routing_map,
             intermediate_output,
             grad_probs,
+            grad_logits,
             topk,
             use_pre_softmax,
             scaling_factor,
@@ -1444,6 +1446,7 @@ class IluvatarBackend(TEFLBackendBase):
         num_experts: int,
         intermediate_output: torch.Tensor,
         grad_scores: torch.Tensor,
+        grad_logits: torch.Tensor,
         topk: int,
         score_function: str,
     ) -> torch.Tensor:
@@ -1453,6 +1456,7 @@ class IluvatarBackend(TEFLBackendBase):
             num_experts,
             intermediate_output,
             grad_scores,
+            grad_logits,
             topk,
             score_function,
         )
@@ -1498,7 +1502,7 @@ class IluvatarBackend(TEFLBackendBase):
         self,
         input: torch.Tensor,
         dropout_probability: float,
-        out: Optional[torch.Tensor],
+        out: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         tex = self._get_tex()
         return tex.dropout_fwd(input, dropout_probability, out)
@@ -1508,7 +1512,7 @@ class IluvatarBackend(TEFLBackendBase):
         grad_output: torch.Tensor,
         mask: torch.Tensor,
         dropout_probability: float,
-        grad_input: Optional[torch.Tensor],
+        grad_input: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         tex = self._get_tex()
         return tex.dropout_bwd(grad_output, mask, dropout_probability, grad_input)

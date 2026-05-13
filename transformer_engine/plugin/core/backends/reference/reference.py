@@ -457,7 +457,7 @@ class ReferenceBackend(TEFLBackendBase):
         self,
         input: torch.Tensor,
         dropout_probability: float,
-        out: Optional[torch.Tensor],
+        out: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         return dropout_fwd_torch(input, dropout_probability, out)
 
@@ -466,7 +466,7 @@ class ReferenceBackend(TEFLBackendBase):
         grad_output: torch.Tensor,
         mask: torch.Tensor,
         dropout_probability: float,
-        grad_input: Optional[torch.Tensor],
+        grad_input: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         return dropout_bwd_torch(grad_output, mask, dropout_probability, grad_input)
 
