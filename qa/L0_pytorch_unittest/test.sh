@@ -36,7 +36,8 @@ run_test_step() {
             *"test_attention.py" | \
             *"attention/test_kv_cache.py" | \
             *"test_checkpoint.py" | \
-            *"test_fused_router.py")
+            *"test_fused_router.py" | \
+            *"test_hf_integration.py") # transformers library may not be available in CI
                 echo "-------------------------------------------------------"
                 echo "[SKIP] Platform MetaX: Ignoring $label"
                 echo "-------------------------------------------------------"
@@ -46,7 +47,8 @@ run_test_step() {
     fi
 
     if [[ "$IS_CUDA_BACKEND" == *"cuda"* ]]; then
-        if [[ "$test_path" == *"test_checkpoint.py" || "$test_path" == *"test_cpu_offloading.py" || "$test_path" == *"test_cpu_offloading_v1.py" || "$test_path" == *"test_attention.py" || "$test_path" == *"attention/test_kv_cache.py" ]]; then
+        # transformers library may not be available in CI
+        if [[ "$test_path" == *"test_checkpoint.py" || "$test_path" == *"test_cpu_offloading.py" || "$test_path" == *"test_cpu_offloading_v1.py" || "$test_path" == *"test_attention.py" || "$test_path" == *"attention/test_kv_cache.py" || "$test_path" == *"test_hf_integration.py" ]]; then
             echo "-------------------------------------------------------"
             echo "[SKIP] CUDA Backend detected: Ignoring $label"
             echo "-------------------------------------------------------"
