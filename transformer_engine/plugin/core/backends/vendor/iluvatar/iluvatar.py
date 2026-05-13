@@ -718,11 +718,11 @@ class IluvatarBackend(TEFLBackendBase):
         self,
         input: torch.Tensor,
         dtype: DType,
-        out: Optional[torch.Tensor],
+        out: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         tex = self._get_tex()
         dtype = tex.DType(int(dtype)) if dtype is not None else None
-        return tex.fp8_transpose(input, dtype, out)
+        return tex.fp8_transpose(input, dtype, out=out)
 
     def swap_first_dims(
         self,

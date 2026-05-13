@@ -930,7 +930,7 @@ class TEFLBackendBase(ABC):
         self,
         input: torch.Tensor,
         dtype: DType,
-        out: Optional[torch.Tensor],
+        out: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         raise NotImplementedError
 
