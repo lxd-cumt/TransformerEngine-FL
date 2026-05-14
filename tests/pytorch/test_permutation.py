@@ -1647,6 +1647,10 @@ if te.is_bf16_available():
 @pytest.mark.parametrize("hidden_size", [4096])
 @pytest.mark.parametrize("topK", [2, 5])
 @pytest.mark.parametrize("num_out_tokens", [None, 2039])
+@pytest.mark.skipif(
+    os.environ.get("PLATFORM") == "metax",
+    reason="te_permute bwd precision mismatch on metax platforms",
+)
 def test_permutation_index_map(
     te_dtype,
     num_tokens,

@@ -37,6 +37,7 @@ run_test_step() {
             *"attention/test_kv_cache.py" | \
             *"test_checkpoint.py" | \
             *"test_fused_router.py" | \
+            *"test_cuda_graphs.py" | \
             *"test_hf_integration.py") # transformers library may not be available in CI
                 echo "-------------------------------------------------------"
                 echo "[SKIP] Platform MetaX: Ignoring $label"

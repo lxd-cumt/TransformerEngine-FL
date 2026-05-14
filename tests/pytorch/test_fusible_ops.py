@@ -8,6 +8,7 @@ from collections.abc import Iterable
 import functools
 import io
 import math
+import os
 import random
 from typing import Optional
 
@@ -1602,6 +1603,10 @@ class TestBasicOps:
         cache_quantized_input: bool,
     ) -> None:
         """Activation functions"""
+
+        # Skip glu on MetaX platform (transformer_engine_torch_metax does not support glu now)
+        if activation == "glu" and os.environ.get("PLATFORM") == "metax":
+            pytest.skip("transformer_engine_torch_metax does not support glu now")
 
         # Tensor dimensions
         in_shape = list(out_shape)
