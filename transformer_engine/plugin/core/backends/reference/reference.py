@@ -490,6 +490,17 @@ class ReferenceBackend(TEFLBackendBase):
     ) -> None:
         return multi_tensor_scale_torch(chunk_size, noop_flag, tensor_lists, scale)
 
+    def multi_tensor_scale_tensor(
+        self,
+        chunk_size: int,
+        noop_flag: torch.Tensor,
+        tensor_lists: List[List[torch.Tensor]],
+        scale: torch.Tensor,
+    ) -> None:
+        # Reuse multi_tensor_scale by converting tensor scale to float
+        scale_value = scale.item()
+        return multi_tensor_scale_torch(chunk_size, noop_flag, tensor_lists, scale_value)
+
     def multi_tensor_l2norm(
         self,
         chunk_size: int,
