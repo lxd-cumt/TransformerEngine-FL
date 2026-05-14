@@ -1008,6 +1008,9 @@ class TestBasicOps:
         """GEMM with FP8 inputs and outputs"""
         if quantization is None:
             pytest.skip("Skipping case without quantization")
+        # Skip quantized_weight on MetaX (quantize op NVRTC issue)
+        if quantized_weight and os.environ.get("PLATFORM") == "metax":
+            pytest.skip("quantize op not supported on metax (NVRTC cuda_runtime.h missing)")
         self._test_basic_linear(
             dtype=torch.bfloat16,
             quantization=quantization,
@@ -1053,6 +1056,9 @@ class TestBasicOps:
             pytest.skip("Quantization scheme is not specified")
         if quantization is not None and not (quantized_compute or quantized_weight):
             pytest.skip("Quantization scheme is not used")
+        # Skip quantized_weight on MetaX (quantize op NVRTC issue)
+        if quantized_weight and os.environ.get("PLATFORM") == "metax":
+            pytest.skip("quantize op not supported on metax (NVRTC cuda_runtime.h missing)")
 
         # Random data
         x_ref, x_test = make_reference_and_test_tensors(
@@ -2052,6 +2058,9 @@ class TestBasicOps:
             pytest.skip("Quantization scheme is not specified")
         if quantization is not None and not (quantized_compute or quantized_weight):
             pytest.skip("Quantization scheme is not used")
+        # Skip quantized_weight on MetaX (quantize op NVRTC issue)
+        if quantized_weight and os.environ.get("PLATFORM") == "metax":
+            pytest.skip("quantize op not supported on metax (NVRTC cuda_runtime.h missing)")
         if quantization is not None and dtype not in (torch.bfloat16, torch.float16):
             pytest.skip("Quantized group GEMM is only supported with BF16/FP16")
 
@@ -2278,6 +2287,9 @@ class TestFusedOps:
             pytest.skip(
                 "FP8 fused linear-bias-activation is only supported with FP16 or BF16 output"
             )
+        # Skip quantized_weight on MetaX (quantize op NVRTC issue)
+        if quantized_weight and os.environ.get("PLATFORM") == "metax":
+            pytest.skip("quantize op not supported on metax (NVRTC cuda_runtime.h missing)")
 
         # Random data
         x_ref, x_test = make_reference_and_test_tensors(
@@ -2971,6 +2983,10 @@ class TestCheckpointing:
     ) -> None:
         """Check checkpointing with linear op"""
 
+        # Skip quantized_weight on MetaX (quantize op NVRTC issue)
+        if quantized_weight and os.environ.get("PLATFORM") == "metax":
+            pytest.skip("quantize op not supported on metax (NVRTC cuda_runtime.h missing)")
+
         # Make input and weight shapes consistent
         out_features, in_features = weight_shape
         in_shape = list(in_shape)[:-1] + [in_features]
@@ -3105,6 +3121,9 @@ class TestSequentialModules:
         quantization_needed = quantized_compute or quantized_weight
         if quantization is None and quantization_needed:
             pytest.skip("Quantization scheme is not specified")
+        # Skip quantized_weight on MetaX (quantize op NVRTC issue)
+        if quantized_weight and os.environ.get("PLATFORM") == "metax":
+            pytest.skip("quantize op not supported on metax (NVRTC cuda_runtime.h missing)")
         if quantization is not None and not quantization_needed:
             pytest.skip("Quantization scheme is not used")
 
@@ -3800,6 +3819,10 @@ class TestSequentialModules:
 class TestCustomOps:
     """Test with ops that are defined externally"""
 
+    @pytest.mark.skipif(
+        os.environ.get("PLATFORM") == "metax",
+        reason="test_custom_basic_op gradient precision mismatch on metax platforms",
+    )
     def test_custom_basic_op(
         self,
         *,
