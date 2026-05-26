@@ -446,7 +446,20 @@ def multi_tensor_adam_fp8_torch(
     weight_decay: float,
     fp8_dtype,
 ) -> None:
-    # TODO: FP8 adam 暂不支持，回退到普通 adam 逻辑
+    """
+    FP8 adam optimizer - reference backend fallback.
+
+    Note: This is a fallback implementation that uses FP32 computation instead of FP8.
+    FP8 training is a GPU-specific feature and not supported in the reference backend.
+    """
+    if fp8_dtype is not None:
+        raise NotImplementedError(
+            "FP8 adam is not supported in the reference backend. "
+            "FP8 training requires GPU acceleration. "
+            "Please use a CUDA-enabled build or disable FP8 optimization."
+        )
+
+    # Fallback to regular adam with FP32 computation
     multi_tensor_adam_torch(
         chunk_size,
         noop_flag,
@@ -476,7 +489,27 @@ def multi_tensor_adam_capturable_torch(
     weight_decay: float,
     inv_scale: torch.Tensor,
 ) -> None:
-    # TODO: capturable adam 暂不支持，回退到普通 adam 逻辑
+    """
+    Capturable adam optimizer - reference backend fallback.
+
+    Note: This is a fallback implementation that does not support CUDA graph capture.
+    CUDA graph capture is a GPU-specific feature and not supported in the reference backend.
+    """
+    if isinstance(lr, torch.Tensor) and lr.requires_grad:
+        raise NotImplementedError(
+            "Capturable adam with tensor lr is not supported in the reference backend. "
+            "CUDA graph capture requires GPU acceleration. "
+            "Please use a CUDA-enabled build or use scalar lr."
+        )
+
+    if isinstance(step, torch.Tensor) and step.requires_grad:
+        raise NotImplementedError(
+            "Capturable adam with tensor step is not supported in the reference backend. "
+            "CUDA graph capture requires GPU acceleration. "
+            "Please use a CUDA-enabled build or use scalar step."
+        )
+
+    # Fallback to regular adam with scalar parameters
     multi_tensor_adam_torch(
         chunk_size,
         noop_flag,
@@ -506,7 +539,27 @@ def multi_tensor_adam_capturable_master_torch(
     weight_decay: float,
     inv_scale: torch.Tensor,
 ) -> None:
-    # TODO: capturable master adam 暂不支持，回退到普通 adam 逻辑
+    """
+    Capturable master adam optimizer - reference backend fallback.
+
+    Note: This is a fallback implementation that does not support CUDA graph capture
+    or master weight management. These are GPU-specific features.
+    """
+    if isinstance(lr, torch.Tensor) and lr.requires_grad:
+        raise NotImplementedError(
+            "Capturable master adam with tensor lr is not supported in the reference backend. "
+            "CUDA graph capture requires GPU acceleration. "
+            "Please use a CUDA-enabled build or use scalar lr."
+        )
+
+    if isinstance(step, torch.Tensor) and step.requires_grad:
+        raise NotImplementedError(
+            "Capturable master adam with tensor step is not supported in the reference backend. "
+            "CUDA graph capture requires GPU acceleration. "
+            "Please use a CUDA-enabled build or use scalar step."
+        )
+
+    # Fallback to regular adam with scalar parameters
     multi_tensor_adam_torch(
         chunk_size,
         noop_flag,
