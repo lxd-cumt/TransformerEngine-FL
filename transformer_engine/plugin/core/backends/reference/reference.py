@@ -578,8 +578,18 @@ class ReferenceBackend(TEFLBackendBase):
         fp8_dtype,
     ) -> None:
         return multi_tensor_adam_fp8_torch(
-            chunk_size, noop_flag, tensor_lists, lr, beta1, beta2,
-            epsilon, step, mode, bias_correction, weight_decay, fp8_dtype,
+            chunk_size,
+            noop_flag,
+            tensor_lists,
+            lr,
+            beta1,
+            beta2,
+            epsilon,
+            step,
+            mode,
+            bias_correction,
+            weight_decay,
+            fp8_dtype,
         )
 
     def multi_tensor_adam_capturable(
@@ -598,8 +608,18 @@ class ReferenceBackend(TEFLBackendBase):
         inv_scale: torch.Tensor,
     ) -> None:
         return multi_tensor_adam_capturable_torch(
-            chunk_size, noop_flag, tensor_lists, lr, beta1, beta2,
-            epsilon, step, mode, bias_correction, weight_decay, inv_scale,
+            chunk_size,
+            noop_flag,
+            tensor_lists,
+            lr,
+            beta1,
+            beta2,
+            epsilon,
+            step,
+            mode,
+            bias_correction,
+            weight_decay,
+            inv_scale,
         )
 
     def multi_tensor_adam_capturable_master(
@@ -618,8 +638,18 @@ class ReferenceBackend(TEFLBackendBase):
         inv_scale: torch.Tensor,
     ) -> None:
         return multi_tensor_adam_capturable_master_torch(
-            chunk_size, noop_flag, tensor_lists, lr, beta1, beta2,
-            epsilon, step, mode, bias_correction, weight_decay, inv_scale,
+            chunk_size,
+            noop_flag,
+            tensor_lists,
+            lr,
+            beta1,
+            beta2,
+            epsilon,
+            step,
+            mode,
+            bias_correction,
+            weight_decay,
+            inv_scale,
         )
 
     def multi_tensor_adam_param_remainder(
