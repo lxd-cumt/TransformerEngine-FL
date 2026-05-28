@@ -10,7 +10,6 @@ import warnings
 
 import torch
 
-import transformer_engine_torch as tex
 from transformer_engine_torch import CommOverlapType
 
 try:
